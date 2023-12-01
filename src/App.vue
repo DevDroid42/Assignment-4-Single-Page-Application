@@ -1,4 +1,5 @@
 <script setup>
+/* global L*/
 import { reactive, ref, onMounted } from 'vue'
 
 let crime_url = ref('');
