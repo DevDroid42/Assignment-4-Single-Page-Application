@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 import * as url from 'node:url';
-
+import cors from 'cors'
 import { default as express, response } from 'express';
 import { default as sqlite3 } from 'sqlite3';
 import { default as sql_query} from 'sql-query';
@@ -230,3 +230,5 @@ app.delete('/remove-incident', (req, res) => {
 app.listen(port, () => {
     console.log('Now listening on port ' + port);
 });
+
+app.use(cors())
