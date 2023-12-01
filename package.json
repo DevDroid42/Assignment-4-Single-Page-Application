@@ -3,8 +3,8 @@
     "description": "RESTful Web Server and Single Page Application",
     "version": "1.0.0",
     "author": {
-        "name": "",
-        "email": ""
+        "name": "Ethan",
+        "email": "honz7449@stthomas.edu"
     },
     "contributors": [],
     "repository": {},
@@ -16,7 +16,8 @@
     "dependencies": {
         "express": "^4.18.2",
         "sqlite3": "^5.1.6",
-        "vue": "^3.3.4"
+        "vue": "^3.3.4",
+        "sql-query": "^0.1.27"
     },
     "devDependencies": {
         "@vitejs/plugin-vue": "^4.4.0",
