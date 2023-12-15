@@ -1,9 +1,11 @@
 <script setup>
 /* global L*/
 import { reactive, ref, onMounted } from 'vue'
+import CrimeRow from './components/CrimeRow.vue';
 
 let crime_url = ref('');
 let dialog_err = ref(false);
+let crimes = reactive([]);
 let map = reactive(
     {
         leaflet: null,
@@ -71,9 +73,23 @@ onMounted(() => {
 // FUNCTIONS
 // Function called once user has entered REST API URL
 function initializeCrimes() {
-    // TODO: get code and neighborhood data
-    //       get initial 1000 crimes
+    fetch(crime_url.value)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then((data) => {
+            // Assuming the response is an array of crimes
+            console.log('Data received:', data);
+            crimes.splice(0, crimes.length, ...data);
+        })
+        .catch((error) => {
+            console.error('Error fetching data:', error);
+        });
 }
+
 
 // Function called when user presses 'OK' on dialog box
 function closeDialog() {
@@ -114,6 +130,21 @@ function closeDialog() {
         <div class="grid-x grid-padding-x">
             <div id="leafletmap" class="cell auto"></div>
         </div>
+        <table class="crime-table">
+            <thead>
+                <th>Case Number</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Incident Type</th>
+                <th>Incident</th>
+                <th>Police Grid</th>
+                <th>Neighborhood Name</th>
+                <th>Block</th>
+            </thead>
+            <tbody>
+                <CrimeRow v-for="item in crimes" :item=item></CrimeRow>
+            </tbody>
+        </table>
     </div>
 </template>
 
