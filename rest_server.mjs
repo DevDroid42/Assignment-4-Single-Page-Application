@@ -12,6 +12,9 @@ const port = 8000;
 
 let app = express();
 app.use(express.json());
+app.use(cors({
+    origin: '*',
+}));
 
 let sqlGen  = sql_query.Query('SQLite');
 console.log(sqlGen.remove().from('codes').where({code: '?'}).build());
@@ -230,5 +233,3 @@ app.delete('/remove-incident', (req, res) => {
 app.listen(port, () => {
     console.log('Now listening on port ' + port);
 });
-
-app.use(cors())
