@@ -6,6 +6,18 @@ import CrimeRow from './components/CrimeRow.vue';
 let crime_url = ref('');
 let dialog_err = ref(false);
 let crimes = reactive([]);
+let neighborhoods_names = reactive([])
+fetch('http://localhost:8000/neighborhoods')
+.then((response) => {
+    return response.json();
+})
+.then((data) => {
+    neighborhoods_names.splice(0, neighborhoods_names.length, ...data.neighborhoods_names);
+})
+.catch((error) => {
+    console.log('Error: ' + error);
+})
+console.log(neighborhoods_names);
 let map = reactive(
     {
         leaflet: null,
@@ -50,7 +62,16 @@ onMounted(() => {
         minZoom: 11,
         maxZoom: 18
     }).addTo(map.leaflet);
+
+    map.neighborhood_markers.forEach((neighborhood) => {
+        let name = '';
+        neighborhood.marker = L.marker(neighborhood.location).addTo(map.leaflet)
+        .bindPopup(name);
+    })
+
     map.leaflet.setMaxBounds([[44.883658, -93.217977], [45.008206, -92.993787]]);
+
+    
 
     // Get boundaries for St. Paul neighborhoods
     let district_boundary = new L.geoJson();
