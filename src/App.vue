@@ -3,6 +3,7 @@
 import { reactive, ref, onMounted } from 'vue'
 import CrimeRow from './components/CrimeRow.vue';
 
+let search_address = ref('');
 let crime_url = ref('');
 let dialog_err = ref(false);
 let crimes = reactive([]);
@@ -136,15 +137,11 @@ function closeDialog() {
         <br />
         <button class="button" type="button" @click="closeDialog">OK</button>
     </dialog>
-    <div class="grid-container ">
-        <div class="row">
-            <div class="small-12 large-7 columns">
-                <input id="addressDialog" class="dialog-input"
-                    placeholder="2115 Summit Ave, Saint Paul, MN 55105, United States" />
-            </div>
-            <div class="small-12 large-4 columns">
-                <button class="button" type='button'>Search</button>
-            </div>
+    <div class="grid-container grid-padding-x">
+        <div class="grid-x align-stretch">
+            <input id="addressDialog" class="dialog-input cell small-12 large-11"
+                placeholder="2115 Summit Ave, Saint Paul, MN 55105, United States" />
+            <button class="button cell small-12 large-1" type='button'>Search</button>
         </div>
     </div>
     <div class="grid-container ">
