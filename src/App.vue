@@ -147,7 +147,7 @@ function nominatim_api_request(address){
         setTimeout(() => {
             last_nominatim_call = new Date();
             try {
-                fetch('https://nominatim.openstreetmap.org/search?q=' + address + '&format=json&limit=1').then((data) => {
+                fetch('https://nominatim.openstreetmap.org/search?q=' + address + '&format=json&limit=1', {method: "GET"}).then((data) => {
                     resolve(data);
                 })
             } catch (error) {
@@ -159,9 +159,20 @@ function nominatim_api_request(address){
 }
 
 function focus_on_address() {
-    nominatim_api_request().then((data) => {
-        console.log(data);
-        //map.leaflet.panInsideBounds(map.bounds, data)
+    nominatim_api_request(search_address.value).then((response) => {
+        return response.json();
+    }).then(data => {
+        //console.log(data);
+        let pos = [0, 0];
+        let bounds = [[0,0],[0,0]];
+        pos[0] = parseFloat(data[0].lat);
+        pos[1] = parseFloat(data[0].lon);
+        bounds[0][0] = parseFloat(data[0].boundingbox[0]);
+        bounds[0][1] = parseFloat(data[0].boundingbox[3]);
+        bounds[1][0] = parseFloat(data[0].boundingbox[1]);
+        bounds[1][1] = parseFloat(data[0].boundingbox[2]);
+        //console.log(pos);
+        map.leaflet.flyToBounds(bounds);
     }).catch((error) => {
         console.log(error);
     });
