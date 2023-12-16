@@ -6,18 +6,7 @@ import CrimeRow from './components/CrimeRow.vue';
 let crime_url = ref('');
 let dialog_err = ref(false);
 let crimes = reactive([]);
-let neighborhoods_names = reactive([])
-fetch('http://localhost:8000/neighborhoods')
-.then((response) => {
-    return response.json();
-})
-.then((data) => {
-    neighborhoods_names.splice(0, neighborhoods_names.length, ...data.neighborhoods_names);
-})
-.catch((error) => {
-    console.log('Error: ' + error);
-})
-console.log(neighborhoods_names);
+
 let map = reactive(
     {
         leaflet: null,
@@ -51,6 +40,8 @@ let map = reactive(
             {location: [44.949203, -93.093739], marker: null}
         ]
     }
+
+
 );
 
 // Vue callback for once <template> HTML has been added to web page
@@ -63,11 +54,24 @@ onMounted(() => {
         maxZoom: 18
     }).addTo(map.leaflet);
 
-    map.neighborhood_markers.forEach((neighborhood) => {
-        let name = '';
+    // fetch('http://localhost:8000/neighborhoods')
+    // .then((response) => {
+    //     return response.json();
+    // })
+    // .then((data) => {
+    //     data.forEach((item) => {
+    //         neighborhood_names.push(item.neighborhood_name)
+    //     });
+
+    // })
+    // .catch((error) => {
+    //     console.log('Error: ' + error);
+    // })
+
+    map.neighborhood_markers.forEach((neighborhood, index) => {
         neighborhood.marker = L.marker(neighborhood.location).addTo(map.leaflet)
-        .bindPopup(name);
-    })
+        .bindPopup(`Total Crimes: {}`);
+    });
 
     map.leaflet.setMaxBounds([[44.883658, -93.217977], [45.008206, -92.993787]]);
 
@@ -125,9 +129,130 @@ function closeDialog() {
         dialog_err.value = true;
     }
 }
+
+let selectedIncidentTypes = reactive([]);
+let selectedNeighborhoods = reactive([]);
+let startDate = ref('');
+let endDate = ref('');
+let maxIncidents = ref('');
+
+const incidentTypes = {
+  "Homicide": [100, 110, 120],
+  "Robbery": [300, 311, 312, 313, 314, 321, 322, 323, 324, 331, 332, 333, 334, 341, 342, 343, 344, 351, 352, 353, 354, 361, 362, 363, 364, 371, 372, 373, 374],
+  "Aggravated Assault": [400, 410, 411, 412, 420, 421, 422, 430, 431, 432, 440, 441, 442, 450, 451, 452, 453],
+  "Burglary": [500, 510, 511, 513, 515, 516, 520, 521, 523, 525, 526, 530, 531, 533, 535, 536, 540, 541, 543, 545, 546, 550, 551, 553, 555, 556, 560, 561, 563, 565, 566],
+  "Theft": [600, 601, 603, 611, 612, 613, 614, 621, 622, 623, 630, 631, 632, 633, 640, 641, 642, 643, 651, 652, 653, 661, 662, 663, 671, 672, 673, 681, 682, 683, 691, 692, 693],
+  "Motor Vehicle Theft": [700, 710, 711, 712, 720, 721, 722, 730, 731, 732],
+  "Assault": [810, 861, 862, 863],
+  "Arson": [900, 901, 903, 905, 911, 913, 915, 921, 922, 923, 925, 931, 933, 941, 942, 951, 961, 971, 972, 975, 981, 982],
+  "Criminal Damage to Property": [1400, 1401, 1410, 1415, 1416, 1420, 1425, 1426, 1430, 1435, 1436],
+  "Narcotics": [1800, 1810, 1811, 1812, 1813, 1814, 1815, 1820, 1822, 1823, 1824, 1825, 1830, 1835, 1840, 1841, 1842, 1843, 1844, 1845, 1850, 1855, 1860, 1865, 1870, 1880, 1885],
+  "Weapons": [2619],
+  "Death Investigation": [3100],
+  "Proactive Policing": [9954, 9959, 9986]
+};
+const neighborhoods = reactive([]);
+
+fetch('http://localhost:8000/neighborhoods')
+.then((response) => {
+    return response.json();
+})
+.then((data) => {
+    data.forEach((item) => {
+        neighborhoods.push(item);
+    })
+})
+
+function updateFilters() {
+  const apiUrl = constructApiUrl();
+  crime_url.value = apiUrl;
+  initializeCrimes();
+}
+
+function constructApiUrl() {
+  let apiUrl = 'http://localhost:8000/incidents?';
+
+  if (selectedIncidentTypes.length > 0) {
+    let codes = []
+    selectedIncidentTypes.forEach((type) => {
+        codes.push(incidentTypes[type]);
+    })
+    apiUrl += `code=${codes.join(',')}&`;
+  }
+
+  if (selectedNeighborhoods.length > 0) {
+    apiUrl += `neighborhood=${selectedNeighborhoods.join(',')}&`;
+  }
+
+  if (startDate.value) {
+    apiUrl += `start_date=${startDate.value}&`;
+  }
+
+  if (endDate.value) {
+    apiUrl += `end_date=${endDate.value}&`;
+  }
+
+  if (maxIncidents.value) {
+    apiUrl += `limit=${maxIncidents.value}&`;
+  }
+
+  return apiUrl;
+}
 </script>
 
 <template>
+    <div class="grid-x grid-padding-x filter-controls">
+            <div class="cell large-3">
+                <h2>Incident Types</h2>
+                <div v-for="(codes, category) in incidentTypes" :key=category class="checkbox">
+                <input
+                    type="checkbox"
+                    :id="category"
+                    :value="category"
+                    v-model="selectedIncidentTypes"
+                    @change="updateFilters"
+                />
+                <label :for="category">{{ category }}</label>
+                </div>
+            </div>
+
+            <div class="cell large-3">
+                <h2>Neighborhoods</h2>
+                <div v-for="neighborhood in neighborhoods" :key="neighborhood" class="checkbox">
+                <input
+                    type="checkbox"
+                    :id="neighborhood.neighborhood_number"
+                    :value="neighborhood.neighborhood_number"
+                    v-model="selectedNeighborhoods"
+                    @change="updateFilters"
+                />
+                <label :for="neighborhood">{{ neighborhood.neighborhood_name }}</label>
+                </div>
+            </div>
+
+            <div class="cell large-3">
+                <h2>Date Range</h2>
+                <label for="startDate">Start Date:</label>
+                <input type="date" id="startDate" v-model="startDate" @change="updateFilters" />
+
+                <label for="endDate">End Date:</label>
+                <input type="date" id="endDate" v-model="endDate" @change="updateFilters" />
+            </div>
+
+            <div class="cell large-3">
+                <h2>Max Incidents</h2>
+                <input
+                type="number"
+                id="maxIncidents"
+                v-model="maxIncidents"
+                @input="updateFilters"
+                />
+            </div>
+
+            <div class="cell large-12">
+                <button class="button" @click="updateFilters">Update</button>
+            </div>
+    </div>
     <dialog id="rest-dialog" open>
         <h1 class="dialog-header">St. Paul Crime REST API</h1>
         <label class="dialog-label">URL: </label>
@@ -148,11 +273,11 @@ function closeDialog() {
                 <th>Incident Type</th>
                 <th>Incident</th>
                 <th>Police Grid</th>
-                <th>Neighborhood Name</th>
+                <th>Neighborhood</th>
                 <th>Block</th>
             </thead>
             <tbody>
-                <CrimeRow v-for="item in crimes" :item=item></CrimeRow>
+                <CrimeRow v-for="(item, index) in crimes" :item=item :key=index></CrimeRow>
             </tbody>
         </table>
     </div>
