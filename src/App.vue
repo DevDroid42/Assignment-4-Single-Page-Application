@@ -81,7 +81,16 @@ onMounted(() => {
 
     map.leaflet.setMaxBounds([[44.883658, -93.217977], [45.008206, -92.993787]]);
 
+    map.leaflet.on("move", () => {
+        map.center = map.leaflet.getCenter();
+    });
 
+    map.leaflet.on("moveend", () => {
+        search_address.value = "loading";
+        nominatim_api_request('https://nominatim.openstreetmap.org/reverse?lat=' + map.center.lat + '&lon=' + map.center.lng + '&format=json&limit=1').then((json) => {
+            search_address.value = json.display_name;
+        });
+    });
 
     // Get boundaries for St. Paul neighborhoods
     let district_boundary = new L.geoJson();
@@ -142,7 +151,7 @@ let last_nominatim_call = new Date();
 /**
  * returns a promise with the api request. This will be limited to once every couple of seconds to prevent nominatim overload
  */
-function nominatim_api_request(address) {
+function nominatim_api_request(request) {
     return new Promise((resolve, reject) => {
         if (call_running) {
             reject("Call already in progress");
@@ -153,8 +162,8 @@ function nominatim_api_request(address) {
         setTimeout(() => {
             last_nominatim_call = new Date();
             try {
-                fetch('https://nominatim.openstreetmap.org/search?q=' + address + '&format=json&limit=1', { method: "GET" }).then((data) => {
-                    resolve(data);
+                fetch(request, { method: "GET" }).then((data) => {
+                    resolve(data.json());
                 })
             } catch (error) {
                 reject(error);
@@ -165,9 +174,7 @@ function nominatim_api_request(address) {
 }
 
 function focus_on_address() {
-    nominatim_api_request(search_address.value).then((response) => {
-        return response.json();
-    }).then(data => {
+    nominatim_api_request('https://nominatim.openstreetmap.org/search?q=' + search_address.value + '&format=json&limit=1').then(data => {
         if (data.length == 0) {
             console.log("no address found");
             return;
@@ -258,6 +265,18 @@ function constructApiUrl() {
 
     return apiUrl;
 }
+
+const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+function goto_lat_lon() {
+    map.center.lat = clamp(map.center.lat, st_paul_bounds.se.lat, st_paul_bounds.nw.lat);
+    map.center.lng = clamp(map.center.lng, st_paul_bounds.nw.lng, st_paul_bounds.se.lng);
+    let pos = [0, 0];
+    pos[0] = parseFloat(map.center.lat);
+    pos[1] = parseFloat(map.center.lng);
+    map.leaflet.flyTo(pos);
+}
+
+
 </script>
 
 <template>
@@ -308,9 +327,19 @@ function constructApiUrl() {
     </dialog>
     <div class="grid-container grid-padding-x">
         <div class="grid-x align-stretch">
+            <h3 class="cell small-12 large-12" style="text-align: center; background-color: rgb(240, 242, 255);">Address
+            </h3>
             <input id="addressDialog" class="dialog-input cell small-12 large-11" v-model="search_address"
                 placeholder="2115 Summit Ave, Saint Paul, MN 55105, United States" />
             <button class="button cell small-12 large-1" type='button' @click="focus_on_address">Search</button>
+
+            <h3 class="cell small-12 large-12" style="text-align: center; background-color: rgb(240, 242, 255);">Geo
+                Location</h3>
+            <label class="label cell small-2 large-2">latitude</label>
+            <input id="latitude" class="dialog-input cell small-10 large-3" v-model="map.center.lat" placeholder="lat" />
+            <label class="label cell small-2 large-2">longitude</label>
+            <input id="longitude" class="dialog-input cell small-10 large-3" v-model="map.center.lng" placeholder="lat" />
+            <button class="button cell small-12 large-1" type='button' @click="goto_lat_lon">Go</button>
         </div>
     </div>
     <div class="grid-container ">
