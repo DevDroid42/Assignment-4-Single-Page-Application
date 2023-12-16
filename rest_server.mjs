@@ -145,7 +145,7 @@ app.get('/incidents', (req, res) => {
     } 
     if(neighborhoods.length > 0){
         let paramList = [];
-        for (let i = 0; i < grids.length; i++) {
+        for (let i = 0; i < neighborhoods.length; i++) {
             paramList.push('?');
         }
         sqlQuery.where({neighborhood_number: paramList});
