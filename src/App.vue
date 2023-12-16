@@ -131,6 +131,42 @@ function closeDialog() {
     }
 }
 
+//the last time that an api request was made
+let call_running = false;
+let last_nominatim_call = new Date();
+/**
+ * returns a promise with the api request. This will be limited to once every 10 seconds to prevent nominatim overload
+ */
+function nominatim_api_request(address){
+    return new Promise((resolve, reject) => {
+        if(call_running){
+            reject("Call already in progress");
+        }
+        let time = Math.max(2000 - (new Date() - last_nominatim_call), 0);
+        call_running = true;
+        setTimeout(() => {
+            last_nominatim_call = new Date();
+            try {
+                fetch('https://nominatim.openstreetmap.org/search?q=' + address + '&format=json&limit=1').then((data) => {
+                    resolve(data);
+                })
+            } catch (error) {
+                reject(error);
+            } 
+            call_running = false;
+        }, time);
+    });
+}
+
+function focus_on_address() {
+    nominatim_api_request().then((data) => {
+        console.log(data);
+        //map.leaflet.panInsideBounds(map.bounds, data)
+    }).catch((error) => {
+        console.log(error);
+    });
+}
+
 let selectedIncidentTypes = reactive([]);
 let selectedNeighborhoods = reactive([]);
 let startDate = ref('');
@@ -264,9 +300,9 @@ function constructApiUrl() {
     </dialog>
     <div class="grid-container grid-padding-x">
         <div class="grid-x align-stretch">
-            <input id="addressDialog" class="dialog-input cell small-12 large-11"
+            <input id="addressDialog" class="dialog-input cell small-12 large-11" v-model="search_address"
                 placeholder="2115 Summit Ave, Saint Paul, MN 55105, United States" />
-            <button class="button cell small-12 large-1" type='button'>Search</button>
+            <button class="button cell small-12 large-1" type='button' @click="focus_on_address">Search</button>
         </div>
     </div>
     <div class="grid-container ">
