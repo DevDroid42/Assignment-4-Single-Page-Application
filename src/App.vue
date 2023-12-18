@@ -2,8 +2,6 @@
 /* global L*/
 import { reactive, ref, onMounted } from 'vue'
 import CrimeRow from './components/CrimeRow.vue';
-import { getAxisGroup } from 'plotly.js-dist';
-
 
 let search_address = ref('');
 let crime_url = ref('');
@@ -62,20 +60,6 @@ onMounted(() => {
         maxZoom: 18
     }).addTo(map.leaflet);
 
-    // fetch('http://localhost:8000/neighborhoods')
-    // .then((response) => {
-    //     return response.json();
-    // })
-    // .then((data) => {
-    //     data.forEach((item) => {
-    //         neighborhood_names.push(item.neighborhood_name)
-    //     });
-
-    // })
-    // .catch((error) => {
-    //     console.log('Error: ' + error);
-    // })
-
     map.neighborhood_markers.forEach((neighborhood, index) => {
         neighborhood.marker = L.marker(neighborhood.location).addTo(map.leaflet)
             .bindPopup(`Total Crimes: {}`);
@@ -112,8 +96,6 @@ onMounted(() => {
 });
 
 
-// FUNCTIONS
-// Function called once user has entered REST API URL
 function initializeCrimes() {
     fetch(crime_url.value)
         .then((response) => {
@@ -123,7 +105,6 @@ function initializeCrimes() {
             return response.json();
         })
         .then((data) => {
-            // Assuming the response is an array of crimes
             console.log('Data received:', data);
             crimes.splice(0, crimes.length, ...data);
         })
@@ -206,7 +187,7 @@ let endDate = ref('');
 let maxIncidents = ref('');
 
 const incidentTypes = {
-    "Homicide": [100, 110, 120],
+    "Homicide": [100, 110, 120, 3100],
     "Robbery": [300, 311, 312, 313, 314, 321, 322, 323, 324, 331, 332, 333, 334, 341, 342, 343, 344, 351, 352, 353, 354, 361, 362, 363, 364, 371, 372, 373, 374],
     "Aggravated Assault": [400, 410, 411, 412, 420, 421, 422, 430, 431, 432, 440, 441, 442, 450, 451, 452, 453],
     "Burglary": [500, 510, 511, 513, 515, 516, 520, 521, 523, 525, 526, 530, 531, 533, 535, 536, 540, 541, 543, 545, 546, 550, 551, 553, 555, 556, 560, 561, 563, 565, 566],
@@ -217,7 +198,6 @@ const incidentTypes = {
     "Criminal Damage to Property": [1400, 1401, 1410, 1415, 1416, 1420, 1425, 1426, 1430, 1435, 1436],
     "Narcotics": [1800, 1810, 1811, 1812, 1813, 1814, 1815, 1820, 1822, 1823, 1824, 1825, 1830, 1835, 1840, 1841, 1842, 1843, 1844, 1845, 1850, 1855, 1860, 1865, 1870, 1880, 1885],
     "Weapons": [2619],
-    "Death Investigation": [3100],
     "Proactive Policing": [9954, 9959, 9986]
 };
 const neighborhoods = reactive([]);
@@ -317,7 +297,7 @@ function generateNewIncident() {
     }
 }
 
-
+//Only show crimes that occurred in neighborhoods visible on the map
 
 
 </script>
