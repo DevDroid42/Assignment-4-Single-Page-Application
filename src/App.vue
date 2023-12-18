@@ -2,6 +2,8 @@
 /* global L*/
 import { reactive, ref, onMounted } from 'vue'
 import CrimeRow from './components/CrimeRow.vue';
+import { getAxisGroup } from 'plotly.js-dist';
+
 
 let search_address = ref('');
 let crime_url = ref('');
@@ -288,6 +290,51 @@ function goto_lat_lon() {
     map.leaflet.flyTo(pos);
 }
 
+let newDate = ref('');
+let newTime = ref('');
+let newIncidentType = ref('');
+let newIncident = ref('');
+let newPoliceGrid = ref('');
+let newNeighborhood = ref('');
+let newBlock = ref('');
+
+function updateNewIncident() {
+    newDate.value = this.newDate;
+    newTime.value = this.newTime;
+    newIncidentType.value = this.newIncidentType;
+    newIncident.value = this.newIncident;
+    newPoliceGrid.value = this.newPoliceGrid;
+    newNeighborhood.value = this.newNeighborhood;
+    newBlock.value = this.newBlock;
+}
+function generateNewIncident() {
+    console.log(newDate.value);
+    if(!newDate.value || !newTime.value || !newIncident.value || !newPoliceGrid.value || !newNeighborhood.value || !newBlock.value) {
+        console.log("Field(s) empty")
+        return "Field(s) empty";
+        
+    } else {
+        let caseNumber = 3213
+        const response = fetch('http://localhost:8000/new-incident', {
+            method: "PUT",
+            mode: "cors",
+            cache: "no-cache",
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            redirect: "follow",
+            referrerPolicy: "no-referrer",
+            body: JSON.stringify(caseNumber,newDate.value, newTime.value, newIncident.value, newPoliceGrid.value, newNeighborhood.value, newBlock.value),
+        }).then((response => {
+            console.log(response.json());
+            return response.json();
+        }));
+    }
+}
+
+
+
 
 </script>
 
@@ -337,6 +384,26 @@ function goto_lat_lon() {
         <br />
         <button class="button" type="button" @click="closeDialog">OK</button>
     </dialog>
+    <div class="grid-container grid-padding-x">
+        <template v-if="generateNewIncident">
+        <h2>Submit New Incident</h2>
+        <h3>Date</h3>
+        <input type="date" id="newDate" v-model="newDate"/>
+        <h3>Time</h3>
+        <input type="time" id="newTime" v-model="newTime"/>
+        <h3>Incident Type</h3>
+        <input id="newIncidentType" v-model="newIncidentType"/>
+        <h3>Incident</h3>
+        <input id="newIncident" v-model="newIncident"/>
+        <h3>Police Grid</h3>
+        <input type="number" id="newPoliceGrid" v-model="newPoliceGrid"/>
+        <h3>Neighborhood</h3>
+        <input type="number" id="newNeighborhood" v-model="newNeighborhood"/>
+        <h3>Block</h3>
+        <input id="newBlock" v-model="newBlock" @input="updateNewIncident, console.log(newBlock)"/>
+        <button class="button cell small-12 large-1" type='button' @click="generateNewIncident">Submit</button>
+        </template>
+    </div>
     <div class="grid-container grid-padding-x">
         <div class="grid-x align-stretch">
             <h3 class="cell small-12 large-12" style="text-align: center; background-color: rgb(240, 242, 255);">Address

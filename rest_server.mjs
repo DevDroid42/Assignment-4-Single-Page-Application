@@ -181,8 +181,8 @@ app.get('/incidents', (req, res) => {
 
 // PUT request handler for new crime incident
 app.put('/new-incident', (req, res) => {
-    console.log(req.query); // uploaded data
-    let data = req.query;
+    console.log(req.body); // uploaded data
+    let data = req.body;
     
     let dateTime = data.date + data.time;
     let sqlQuery = sqlGen.insert().into('Incidents');
