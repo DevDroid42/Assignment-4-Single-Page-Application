@@ -4,6 +4,7 @@ import { reactive, ref, onMounted } from 'vue'
 import CrimeRow from './components/CrimeRow.vue';
 import { getAxisGroup } from 'plotly.js-dist';
 
+
 let search_address = ref('');
 let crime_url = ref('');
 let dialog_err = ref(false);
@@ -285,10 +286,38 @@ let newPoliceGrid = ref('');
 let newNeighborhood = ref('');
 let newBlock = ref('');
 
-function generateNewIncident() {
-    if(newDate)
-    
+function updateNewIncident() {
+    newDate.value = this.newDate;
+    newTime.value = this.newTime;
+    newIncidentType.value = this.newIncidentType;
+    newIncident.value = this.newIncident;
+    newPoliceGrid.value = this.newPoliceGrid;
+    newNeighborhood.value = this.newNeighborhood;
+    newBlock.value = this.newBlock;
 }
+function generateNewIncident() {
+    console.log(newDate.value);
+    if(!newDate.value || !newTime.value || !newIncidentType.value || !newIncident.value || !newPoliceGrid.value || !newNeighborhood.value || !newBlock.value) {
+        console.log("Field(s) empty")
+        return "Field(s) empty";
+        
+    } else {
+        fetch('http://localhost:8000/new-incident', {
+            method: "PUT",
+            mode: "cors",
+            cache: "no-cache",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            redirect: "follow",
+            referrerPolicy: "no-referrer",
+            body: JSON.stringify(newDate.value, newTime.value, newIncidentType.value, newIncident.value, newPoliceGrid.value, newNeighborhood.value, newBlock.value),
+        });
+    }
+}
+
+
 
 
 </script>
@@ -340,22 +369,24 @@ function generateNewIncident() {
         <button class="button" type="button" @click="closeDialog">OK</button>
     </dialog>
     <div class="grid-container grid-padding-x">
+        <template v-if="generateNewIncident">
         <h2>Submit New Incident</h2>
         <h3>Date</h3>
-        <input type="date" id="newDate" v-model="newDate"/>
+        <input type="date" id="newDate" v-model="newDate" @input="console.log(newDate)"/>
         <h3>Time</h3>
-        <input type="time" id="newTime" v-model="newTime"/>
+        <input type="time" id="newTime" v-model="newTime" @input="console.log(newTime)"/>
         <h3>Incident Type</h3>
-        <input id="newIncidentType" v-model="newIncidentType"/>
+        <input id="newIncidentType" v-model="newIncidentType" @input="console.log(newIncidentType)"/>
         <h3>Incident</h3>
-        <input id="newIncident" v-model="newIncident"/>
+        <input id="newIncident" v-model="newIncident" @input="console.log(newIncident)"/>
         <h3>Police Grid</h3>
-        <input type="number" id="newPoliceGrid" v-model="newPoliceGrid"/>
+        <input type="number" id="newPoliceGrid" v-model="newPoliceGrid" @input="console.log(newPoliceGrid)"/>
         <h3>Neighborhood</h3>
-        <input type="number" id="newNeighborhood" v-model="newNeighborhood"/>
+        <input type="number" id="newNeighborhood" v-model="newNeighborhood" @input="console.log(newNeighborhood)"/>
         <h3>Block</h3>
-        <input id="newBlock" v-model="newBlock"/>
+        <input id="newBlock" v-model="newBlock" @input="updateNewIncident, console.log(newBlock)"/>
         <button class="button cell small-12 large-1" type='button' @click="generateNewIncident">Submit</button>
+        </template>
     </div>
     <div class="grid-container grid-padding-x">
         <div class="grid-x align-stretch">
