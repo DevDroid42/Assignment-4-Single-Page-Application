@@ -101,24 +101,6 @@ onMounted(() => {
 });
 
 
-function initializeCrimes() {
-    fetch(crime_url.value)
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then((data) => {
-            console.log('Data received:', data);
-            crimes.splice(0, crimes.length, ...data);
-        })
-        .catch((error) => {
-            console.error('Error fetching data:', error);
-        });
-}
-
-
 // Function called when user presses 'OK' on dialog box
 function closeDialog() {
     let dialog = document.getElementById('rest-dialog');
@@ -126,12 +108,17 @@ function closeDialog() {
     if (crime_url.value !== '' && url_input.checkValidity()) {
         dialog_err.value = false;
         dialog.close();
-        initializeCrimes();
+        fetchCrimesFromAPI(constructApiUrl());
+        fetchNeighborhoodsFromAPI();
     }
     else {
         dialog_err.value = true;
     }
 }
+
+
+//=========================================================
+//=====================NOMINATIM CODE======================
 
 //the last time that an api request was made
 let call_running = false;
@@ -185,50 +172,22 @@ function focus_on_address() {
     });
 }
 
-function create_crime_markers() {
-
+const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+function goto_lat_lon() {
+    map.center.lat = clamp(map.center.lat, st_paul_bounds.se.lat, st_paul_bounds.nw.lat);
+    map.center.lng = clamp(map.center.lng, st_paul_bounds.nw.lng, st_paul_bounds.se.lng);
+    let pos = [0, 0];
+    pos[0] = parseFloat(map.center.lat);
+    pos[1] = parseFloat(map.center.lng);
+    map.leaflet.flyTo(pos);
 }
 
-let selectedIncidentTypes = reactive([]);
-let selectedNeighborhoods = reactive([]);
-let startDate = ref('');
-let endDate = ref('');
-let maxIncidents = ref('');
+//^^^^^^^^^^^^^^NOMINATIM CODE^^^^^^^^^^^^^^
 
-const incidentTypes = {
-    "Homicide": [100, 110, 120, 3100],
-    "Robbery": [300, 311, 312, 313, 314, 321, 322, 323, 324, 331, 332, 333, 334, 341, 342, 343, 344, 351, 352, 353, 354, 361, 362, 363, 364, 371, 372, 373, 374],
-    "Aggravated Assault": [400, 410, 411, 412, 420, 421, 422, 430, 431, 432, 440, 441, 442, 450, 451, 452, 453],
-    "Burglary": [500, 510, 511, 513, 515, 516, 520, 521, 523, 525, 526, 530, 531, 533, 535, 536, 540, 541, 543, 545, 546, 550, 551, 553, 555, 556, 560, 561, 563, 565, 566],
-    "Theft": [600, 601, 603, 611, 612, 613, 614, 621, 622, 623, 630, 631, 632, 633, 640, 641, 642, 643, 651, 652, 653, 661, 662, 663, 671, 672, 673, 681, 682, 683, 691, 692, 693],
-    "Motor Vehicle Theft": [700, 710, 711, 712, 720, 721, 722, 730, 731, 732],
-    "Assault": [810, 861, 862, 863],
-    "Arson": [900, 901, 903, 905, 911, 913, 915, 921, 922, 923, 925, 931, 933, 941, 942, 951, 961, 971, 972, 975, 981, 982],
-    "Criminal Damage to Property": [1400, 1401, 1410, 1415, 1416, 1420, 1425, 1426, 1430, 1435, 1436],
-    "Narcotics": [1800, 1810, 1811, 1812, 1813, 1814, 1815, 1820, 1822, 1823, 1824, 1825, 1830, 1835, 1840, 1841, 1842, 1843, 1844, 1845, 1850, 1855, 1860, 1865, 1870, 1880, 1885],
-    "Weapons": [2619],
-    "Proactive Policing": [9954, 9959, 9986]
-};
-const neighborhoods = reactive([]);
-
-fetch('http://localhost:8000/neighborhoods')
-    .then((response) => {
-        return response.json();
-    })
-    .then((data) => {
-        data.forEach((item) => {
-            neighborhoods.push(item);
-        })
-    })
-
-function updateFilters() {
-    const apiUrl = constructApiUrl();
-    crime_url.value = apiUrl;
-    initializeCrimes();
-}
-
+//=========================================
+//==============CRIME API CODE=============
 function constructApiUrl() {
-    let apiUrl = 'http://localhost:8000/incidents?';
+    let apiUrl = crime_url.value+'/incidents?';
 
     if (selectedIncidentTypes.length > 0) {
         let codes = []
@@ -257,15 +216,75 @@ function constructApiUrl() {
     return apiUrl;
 }
 
-const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-function goto_lat_lon() {
-    map.center.lat = clamp(map.center.lat, st_paul_bounds.se.lat, st_paul_bounds.nw.lat);
-    map.center.lng = clamp(map.center.lng, st_paul_bounds.nw.lng, st_paul_bounds.se.lng);
-    let pos = [0, 0];
-    pos[0] = parseFloat(map.center.lat);
-    pos[1] = parseFloat(map.center.lng);
-    map.leaflet.flyTo(pos);
+function fetchCrimesFromAPI(url) {
+    console.log('fetchCrimesFromAPI: fetching:' + url);
+    fetch(url)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then((data) => {
+            console.log('Data received:', data);
+            crimes.splice(0, crimes.length, ...data);
+        })
+        .catch((error) => {
+            console.error('Error fetching data:', error);
+        });
 }
+
+function fetchNeighborhoodsFromAPI() {
+    let url = crime_url.value + '/neighborhoods';
+    console.log('fetchNeighborhoodsFromAPI: fetching:' + url);
+    fetch(url)
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            data.forEach((item) => {
+                neighborhoods.push(item);
+            })
+        })
+}
+
+//^^^^^^^^^^^^^^^CRIME API CODE^^^^^^^^^^^^^^^^^^^^
+
+//=================================================
+//=============INCIDENT SELECTION==================
+
+let selectedIncidentTypes = reactive([]);
+let selectedNeighborhoods = reactive([]);
+let startDate = ref('');
+let endDate = ref('');
+let maxIncidents = ref('');
+
+const incidentTypes = {
+    "Homicide": [100, 110, 120, 3100],
+    "Robbery": [300, 311, 312, 313, 314, 321, 322, 323, 324, 331, 332, 333, 334, 341, 342, 343, 344, 351, 352, 353, 354, 361, 362, 363, 364, 371, 372, 373, 374],
+    "Aggravated Assault": [400, 410, 411, 412, 420, 421, 422, 430, 431, 432, 440, 441, 442, 450, 451, 452, 453],
+    "Burglary": [500, 510, 511, 513, 515, 516, 520, 521, 523, 525, 526, 530, 531, 533, 535, 536, 540, 541, 543, 545, 546, 550, 551, 553, 555, 556, 560, 561, 563, 565, 566],
+    "Theft": [600, 601, 603, 611, 612, 613, 614, 621, 622, 623, 630, 631, 632, 633, 640, 641, 642, 643, 651, 652, 653, 661, 662, 663, 671, 672, 673, 681, 682, 683, 691, 692, 693],
+    "Motor Vehicle Theft": [700, 710, 711, 712, 720, 721, 722, 730, 731, 732],
+    "Assault": [810, 861, 862, 863],
+    "Arson": [900, 901, 903, 905, 911, 913, 915, 921, 922, 923, 925, 931, 933, 941, 942, 951, 961, 971, 972, 975, 981, 982],
+    "Criminal Damage to Property": [1400, 1401, 1410, 1415, 1416, 1420, 1425, 1426, 1430, 1435, 1436],
+    "Narcotics": [1800, 1810, 1811, 1812, 1813, 1814, 1815, 1820, 1822, 1823, 1824, 1825, 1830, 1835, 1840, 1841, 1842, 1843, 1844, 1845, 1850, 1855, 1860, 1865, 1870, 1880, 1885],
+    "Weapons": [2619],
+    "Proactive Policing": [9954, 9959, 9986]
+};
+const neighborhoods = reactive([]);
+
+function updateFilters() {
+    const apiUrl = constructApiUrl();
+    fetchCrimesFromAPI(apiUrl);
+}
+
+//^^^^^^^^^^^^^^INCIDENT SELECTION^^^^^^^^^^^^^^^^^^
+
+//=================================================
+//============INCIDENT CREATION===================
+
 
 let newDate = ref('');
 let newTime = ref('');
@@ -286,13 +305,13 @@ function updateNewIncident() {
 }
 function generateNewIncident() {
     console.log(newDate.value);
-    if(!newDate.value || !newTime.value || !newIncident.value || !newPoliceGrid.value || !newNeighborhood.value || !newBlock.value) {
+    if (!newDate.value || !newTime.value || !newIncident.value || !newPoliceGrid.value || !newNeighborhood.value || !newBlock.value) {
         console.log("Field(s) empty")
         return "Field(s) empty";
-        
+
     } else {
         let caseNumber = 3213
-        const response = fetch('http://localhost:8000/new-incident', {
+        const response = fetch(crime_url.value + '/new-incident', {
             method: "PUT",
             mode: "cors",
             cache: "no-cache",
@@ -302,7 +321,7 @@ function generateNewIncident() {
             },
             redirect: "follow",
             referrerPolicy: "no-referrer",
-            body: JSON.stringify(caseNumber,newDate.value, newTime.value, newIncident.value, newPoliceGrid.value, newNeighborhood.value, newBlock.value),
+            body: JSON.stringify(caseNumber, newDate.value, newTime.value, newIncident.value, newPoliceGrid.value, newNeighborhood.value, newBlock.value),
         }).then((response => {
             console.log(response.json());
             return response.json();
@@ -310,6 +329,8 @@ function generateNewIncident() {
     }
 }
 
+
+//^^^^^^^^^^^^^^^^INCIDENT CREATION^^^^^^^^^^^^^^^^^^^^^^^
 //Only show crimes that occurred in neighborhoods visible on the map
 
 
@@ -363,22 +384,22 @@ function generateNewIncident() {
     </dialog>
     <div class="grid-container grid-padding-x">
         <template v-if="generateNewIncident">
-        <h2>Submit New Incident</h2>
-        <h3>Date</h3>
-        <input type="date" id="newDate" v-model="newDate"/>
-        <h3>Time</h3>
-        <input type="time" id="newTime" v-model="newTime"/>
-        <h3>Incident Type</h3>
-        <input id="newIncidentType" v-model="newIncidentType"/>
-        <h3>Incident</h3>
-        <input id="newIncident" v-model="newIncident"/>
-        <h3>Police Grid</h3>
-        <input type="number" id="newPoliceGrid" v-model="newPoliceGrid"/>
-        <h3>Neighborhood</h3>
-        <input type="number" id="newNeighborhood" v-model="newNeighborhood"/>
-        <h3>Block</h3>
-        <input id="newBlock" v-model="newBlock" @input="updateNewIncident, console.log(newBlock)"/>
-        <button class="button cell small-12 large-1" type='button' @click="generateNewIncident">Submit</button>
+            <h2>Submit New Incident</h2>
+            <h3>Date</h3>
+            <input type="date" id="newDate" v-model="newDate" />
+            <h3>Time</h3>
+            <input type="time" id="newTime" v-model="newTime" />
+            <h3>Incident Type</h3>
+            <input id="newIncidentType" v-model="newIncidentType" />
+            <h3>Incident</h3>
+            <input id="newIncident" v-model="newIncident" />
+            <h3>Police Grid</h3>
+            <input type="number" id="newPoliceGrid" v-model="newPoliceGrid" />
+            <h3>Neighborhood</h3>
+            <input type="number" id="newNeighborhood" v-model="newNeighborhood" />
+            <h3>Block</h3>
+            <input id="newBlock" v-model="newBlock" @input="updateNewIncident, console.log(newBlock)" />
+            <button class="button cell small-12 large-1" type='button' @click="generateNewIncident">Submit</button>
         </template>
     </div>
     <div class="grid-container grid-padding-x">
