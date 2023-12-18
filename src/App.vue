@@ -89,7 +89,10 @@ onMounted(() => {
         search_address.value = "loading";
         nominatim_api_request('https://nominatim.openstreetmap.org/reverse?lat=' + map.center.lat + '&lon=' + map.center.lng + '&format=json&limit=1').then((json) => {
             search_address.value = json.display_name;
+        }).catch((error) => {
+            console.log(error);
         });
+        console.log(map.leaflet.latLngBounds);
     });
 
     // Get boundaries for St. Paul neighborhoods
@@ -195,6 +198,15 @@ function focus_on_address() {
     }).catch((error) => {
         console.log(error);
     });
+}
+
+function get_neighbourhoods_in_view(){
+    let bounds = [0, 0, 0, 0];
+        bounds[0][0] = parseFloat();
+        bounds[0][1] = parseFloat();
+        bounds[1][0] = parseFloat();
+        bounds[1][1] = parseFloat();
+    nominatim_api_request('https://nominatim.openstreetmap.org/reverse?lat=' + map.center.lat + '&lon=' + map.center.lng + '&format=json&limit=1&boundingbox=' + bounds.toString());
 }
 
 let selectedIncidentTypes = reactive([]);
@@ -362,6 +374,7 @@ function goto_lat_lon() {
             </tbody>
         </table>
     </div>
+    <a href="/aboutTheProject">/aboutTheProject</a>
 </template>
 
 <style>
