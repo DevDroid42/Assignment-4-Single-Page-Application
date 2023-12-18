@@ -93,7 +93,7 @@ onMounted(() => {
         }).catch((error) => {
             console.log(error);
         });
-        console.log(map.leaflet.latLngBounds);
+        //console.log(map.leaflet.latLngBounds);
     });
 
     // Get boundaries for St. Paul neighborhoods
@@ -202,7 +202,7 @@ function focus_on_address() {
 }
 
 function create_crime_markers() {
-    
+
 }
 
 let selectedIncidentTypes = reactive([]);
