@@ -2,7 +2,6 @@
 /* global L*/
 import { reactive, ref, onMounted } from 'vue'
 import CrimeRow from './components/CrimeRow.vue';
-import { getAxisGroup } from 'plotly.js-dist';
 
 
 let search_address = ref('');
@@ -202,13 +201,8 @@ function focus_on_address() {
     });
 }
 
-function get_neighbourhoods_in_view(){
-    let bounds = [0, 0, 0, 0];
-        bounds[0][0] = parseFloat();
-        bounds[0][1] = parseFloat();
-        bounds[1][0] = parseFloat();
-        bounds[1][1] = parseFloat();
-    nominatim_api_request('https://nominatim.openstreetmap.org/reverse?lat=' + map.center.lat + '&lon=' + map.center.lng + '&format=json&limit=1&boundingbox=' + bounds.toString());
+function create_crime_markers() {
+    
 }
 
 let selectedIncidentTypes = reactive([]);
