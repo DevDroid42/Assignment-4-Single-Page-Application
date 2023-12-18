@@ -277,23 +277,27 @@ function updateNewIncident() {
 }
 function generateNewIncident() {
     console.log(newDate.value);
-    if(!newDate.value || !newTime.value || !newIncidentType.value || !newIncident.value || !newPoliceGrid.value || !newNeighborhood.value || !newBlock.value) {
+    if(!newDate.value || !newTime.value || !newIncident.value || !newPoliceGrid.value || !newNeighborhood.value || !newBlock.value) {
         console.log("Field(s) empty")
         return "Field(s) empty";
         
     } else {
-        fetch('http://localhost:8000/new-incident', {
+        let caseNumber = 3213
+        const response = fetch('http://localhost:8000/new-incident', {
             method: "PUT",
             mode: "cors",
             cache: "no-cache",
-            credentials: "include",
+            credentials: "same-origin",
             headers: {
                 "Content-Type": "application/json",
             },
             redirect: "follow",
             referrerPolicy: "no-referrer",
-            body: JSON.stringify(newDate.value, newTime.value, newIncidentType.value, newIncident.value, newPoliceGrid.value, newNeighborhood.value, newBlock.value),
-        });
+            body: JSON.stringify(caseNumber,newDate.value, newTime.value, newIncident.value, newPoliceGrid.value, newNeighborhood.value, newBlock.value),
+        }).then((response => {
+            console.log(response.json());
+            return response.json();
+        }));
     }
 }
 
@@ -352,17 +356,17 @@ function generateNewIncident() {
         <template v-if="generateNewIncident">
         <h2>Submit New Incident</h2>
         <h3>Date</h3>
-        <input type="date" id="newDate" v-model="newDate" @input="console.log(newDate)"/>
+        <input type="date" id="newDate" v-model="newDate"/>
         <h3>Time</h3>
-        <input type="time" id="newTime" v-model="newTime" @input="console.log(newTime)"/>
+        <input type="time" id="newTime" v-model="newTime"/>
         <h3>Incident Type</h3>
-        <input id="newIncidentType" v-model="newIncidentType" @input="console.log(newIncidentType)"/>
+        <input id="newIncidentType" v-model="newIncidentType"/>
         <h3>Incident</h3>
-        <input id="newIncident" v-model="newIncident" @input="console.log(newIncident)"/>
+        <input id="newIncident" v-model="newIncident"/>
         <h3>Police Grid</h3>
-        <input type="number" id="newPoliceGrid" v-model="newPoliceGrid" @input="console.log(newPoliceGrid)"/>
+        <input type="number" id="newPoliceGrid" v-model="newPoliceGrid"/>
         <h3>Neighborhood</h3>
-        <input type="number" id="newNeighborhood" v-model="newNeighborhood" @input="console.log(newNeighborhood)"/>
+        <input type="number" id="newNeighborhood" v-model="newNeighborhood"/>
         <h3>Block</h3>
         <input id="newBlock" v-model="newBlock" @input="updateNewIncident, console.log(newBlock)"/>
         <button class="button cell small-12 large-1" type='button' @click="generateNewIncident">Submit</button>
