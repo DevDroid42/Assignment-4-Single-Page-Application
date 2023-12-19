@@ -391,7 +391,7 @@ function generateNewIncident() {
             },
             redirect: "follow",
             referrerPolicy: "no-referrer",
-            body: JSON.stringify({case_number : caseNumber, date: newDate.value, time:newTime.value, code: , incident:newIncident.value, police_grid:newPoliceGrid.value, neighborhood_number:newNeighborhood.value, block:newBlock.value}),
+            body: JSON.stringify({case_number : caseNumber, date: newDate.value, time:newTime.value, incident:newIncident.value, police_grid:newPoliceGrid.value, neighborhood_number:newNeighborhood.value, block:newBlock.value}),
         }).then((response => {
             return response;
         })).catch((error) => {
