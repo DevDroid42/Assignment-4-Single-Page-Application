@@ -1,12 +1,12 @@
 <script setup>
 /* global L*/
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted} from 'vue'
 import CrimeRow from './components/CrimeRow.vue';
 
 let search_address = ref('');
 let crime_url = ref('');
 let dialog_err = ref(false);
-let crimes = reactive([]);
+let crimes = ref([]);
 
 const st_paul_bounds = {
     nw: { lat: 45.008206, lng: -93.217977 },
@@ -73,9 +73,23 @@ onMounted(() => {
 
     map.leaflet.on("moveend", () => {
         search_address.value = "loading";
+        let neighborhoodsInView = []
+        map.leaflet.eachLayer((layer) => {
+            if(layer instanceof L.Marker) {
+                if(map.leaflet.getBounds().contains(layer.getLatLng())) {
+                    map.neighborhood_markers.filter((item, index) => {
+                        if(item.location[0] == layer.getLatLng().lat && item.location[1] == layer.getLatLng().lng){
+                            neighborhoodsInView.push(neighborhoods.value[index].neighborhood_number);
+                        }
+                    })
+                }
+            }
+        });
+        selectedNeighborhoods.value = neighborhoodsInView;
         nominatim_api_request('https://nominatim.openstreetmap.org/reverse?lat=' + map.center.lat + '&lon=' + map.center.lng + '&format=json&limit=1').then((json) => {
             search_address.value = json.display_name;
         });
+        updateFilters();
     });
 
     // Get boundaries for St. Paul neighborhoods
@@ -95,7 +109,6 @@ onMounted(() => {
         });
 });
 
-
 function initializeCrimes() {
     fetch(crime_url.value)
         .then((response) => {
@@ -105,8 +118,14 @@ function initializeCrimes() {
             return response.json();
         })
         .then((data) => {
-            console.log('Data received:', data);
-            crimes.splice(0, crimes.length, ...data);
+            data.forEach((item) => {
+                neighborhoods.value.filter((neighborhood) => {
+                    if(neighborhood.neighborhood_number == item.neighborhood_number){
+                        item.neighborhood_name = neighborhood.neighborhood_name
+                    }
+                })
+            });
+            crimes.value = data;
         })
         .catch((error) => {
             console.error('Error fetching data:', error);
@@ -181,7 +200,7 @@ function focus_on_address() {
 }
 
 let selectedIncidentTypes = reactive([]);
-let selectedNeighborhoods = reactive([]);
+let selectedNeighborhoods = ref([]);
 let startDate = ref('');
 let endDate = ref('');
 let maxIncidents = ref('');
@@ -200,7 +219,7 @@ const incidentTypes = {
     "Weapons": [2619],
     "Proactive Policing": [9954, 9959, 9986]
 };
-const neighborhoods = reactive([]);
+const neighborhoods = ref([]);
 
 fetch('http://localhost:8000/neighborhoods')
     .then((response) => {
@@ -208,9 +227,11 @@ fetch('http://localhost:8000/neighborhoods')
     })
     .then((data) => {
         data.forEach((item) => {
-            neighborhoods.push(item);
+            neighborhoods.value.push(item);
         })
     })
+
+
 
 function updateFilters() {
     const apiUrl = constructApiUrl();
@@ -229,8 +250,8 @@ function constructApiUrl() {
         apiUrl += `code=${codes.join(',')}&`;
     }
 
-    if (selectedNeighborhoods.length > 0) {
-        apiUrl += `neighborhood=${selectedNeighborhoods.join(',')}&`;
+    if (selectedNeighborhoods.value.length > 0) {
+        apiUrl += `neighborhood=${selectedNeighborhoods.value.join(',')}&`;
     }
 
     if (startDate.value) {
@@ -311,8 +332,7 @@ function generateNewIncident() {
         <div class="cell large-3">
             <h2>Incident Types</h2>
             <div v-for="(codes, category) in incidentTypes" :key=category class="checkbox">
-                <input type="checkbox" :id="category" :value="category" v-model="selectedIncidentTypes"
-                    @change="updateFilters" />
+                <input type="checkbox" :id="category" :value="category" v-model="selectedIncidentTypes"/>
                 <label :for="category">{{ category }}</label>
             </div>
         </div>
@@ -321,7 +341,7 @@ function generateNewIncident() {
             <h2>Neighborhoods</h2>
             <div v-for="neighborhood in neighborhoods" :key="neighborhood" class="checkbox">
                 <input type="checkbox" :id="neighborhood.neighborhood_number" :value="neighborhood.neighborhood_number"
-                    v-model="selectedNeighborhoods" @change="updateFilters" />
+                    v-model="selectedNeighborhoods"/>
                 <label :for="neighborhood">{{ neighborhood.neighborhood_name }}</label>
             </div>
         </div>
@@ -329,15 +349,15 @@ function generateNewIncident() {
         <div class="cell large-3">
             <h2>Date Range</h2>
             <label for="startDate">Start Date:</label>
-            <input type="date" id="startDate" v-model="startDate" @change="updateFilters" />
+            <input type="date" id="startDate" v-model="startDate"/>
 
             <label for="endDate">End Date:</label>
-            <input type="date" id="endDate" v-model="endDate" @change="updateFilters" />
+            <input type="date" id="endDate" v-model="endDate"/>
         </div>
 
         <div class="cell large-3">
             <h2>Max Incidents</h2>
-            <input type="number" id="maxIncidents" v-model="maxIncidents" @input="updateFilters" />
+            <input type="number" id="maxIncidents" v-model="maxIncidents"/>
         </div>
 
         <div class="cell large-12">
@@ -405,7 +425,7 @@ function generateNewIncident() {
                 <th>Block</th>
             </thead>
             <tbody>
-                <CrimeRow v-for="(item, index) in crimes" :item=item :key=index></CrimeRow>
+                <CrimeRow v-for="(crime, index) in crimes" :item=crime :key=index></CrimeRow>
             </tbody>
         </table>
     </div>

@@ -1,17 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-
-const name = ref('');
-
-const props = defineProps(['item']);
-
-onMounted(() => {
-  fetch(`http://localhost:8000/neighborhoods?id=${props.item.neighborhood_number}`)
-    .then((response) => response.json())
-    .then((data) => {
-      name.value = data.neighborhood_name;
-    });
-});
+defineProps(['item']);
 </script>
 
 <template>
@@ -22,7 +10,7 @@ onMounted(() => {
     <td>{{ item.code }}</td>
     <td>{{ item.incident }}</td>
     <td>{{ item.police_grid }}</td>
-    <td>{{ name.value }}</td>
+    <td>{{item.neighborhood_name}}</td>
     <td>{{ item.block }}</td>
   </tr>
 </template>
