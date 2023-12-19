@@ -3,8 +3,10 @@
 import { reactive, ref, onMounted} from 'vue'
 import CrimeRow from './components/CrimeRow.vue';
 
+
+
 let search_address = ref('');
-let crime_url = ref('');
+let crime_url = ref('http://localhost:8000');
 let dialog_err = ref(false);
 let crimes = ref([]);
 
@@ -88,6 +90,8 @@ onMounted(() => {
         selectedNeighborhoods.value = neighborhoodsInView;
         nominatim_api_request('https://nominatim.openstreetmap.org/reverse?lat=' + map.center.lat + '&lon=' + map.center.lng + '&format=json&limit=1').then((json) => {
             search_address.value = json.display_name;
+        }).catch((error) => {
+            console.log(error);
         });
         updateFilters();
     });
@@ -109,29 +113,6 @@ onMounted(() => {
         });
 });
 
-function initializeCrimes() {
-    fetch(crime_url.value)
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then((data) => {
-            data.forEach((item) => {
-                neighborhoods.value.filter((neighborhood) => {
-                    if(neighborhood.neighborhood_number == item.neighborhood_number){
-                        item.neighborhood_name = neighborhood.neighborhood_name
-                    }
-                })
-            });
-            crimes.value = data;
-        })
-        .catch((error) => {
-            console.error('Error fetching data:', error);
-        });
-}
-
 
 // Function called when user presses 'OK' on dialog box
 function closeDialog() {
@@ -140,12 +121,17 @@ function closeDialog() {
     if (crime_url.value !== '' && url_input.checkValidity()) {
         dialog_err.value = false;
         dialog.close();
-        initializeCrimes();
+        fetchCrimesFromAPI(constructApiUrl());
+        fetchNeighborhoodsFromAPI();
     }
     else {
         dialog_err.value = true;
     }
 }
+
+
+//=========================================================
+//=====================NOMINATIM CODE======================
 
 //the last time that an api request was made
 let call_running = false;
@@ -199,6 +185,93 @@ function focus_on_address() {
     });
 }
 
+const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+function goto_lat_lon() {
+    map.center.lat = clamp(map.center.lat, st_paul_bounds.se.lat, st_paul_bounds.nw.lat);
+    map.center.lng = clamp(map.center.lng, st_paul_bounds.nw.lng, st_paul_bounds.se.lng);
+    let pos = [0, 0];
+    pos[0] = parseFloat(map.center.lat);
+    pos[1] = parseFloat(map.center.lng);
+    map.leaflet.flyTo(pos);
+}
+
+//^^^^^^^^^^^^^^NOMINATIM CODE^^^^^^^^^^^^^^
+
+//=========================================
+//==============CRIME API CODE=============
+function constructApiUrl() {
+    let apiUrl = crime_url.value+'/incidents?';
+
+    if (selectedIncidentTypes.length > 0) {
+        let codes = []
+        selectedIncidentTypes.forEach((type) => {
+            codes.push(incidentTypes[type]);
+        })
+        apiUrl += `code=${codes.join(',')}&`;
+    }
+
+    if (selectedNeighborhoods.value.length > 0) {
+        apiUrl += `neighborhood=${selectedNeighborhoods.value.join(',')}&`;
+    }
+
+    if (startDate.value) {
+        apiUrl += `start_date=${startDate.value}&`;
+    }
+
+    if (endDate.value) {
+        apiUrl += `end_date=${endDate.value}&`;
+    }
+
+    if (maxIncidents.value) {
+        apiUrl += `limit=${maxIncidents.value}&`;
+    }
+
+    return apiUrl;
+}
+
+function fetchCrimesFromAPI(url) {
+    console.log('fetchCrimesFromAPI: fetching:' + url);
+    fetch(url)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then((data) => {
+            data.forEach((item) => {
+                neighborhoods.value.filter((neighborhood) => {
+                    if(neighborhood.neighborhood_number == item.neighborhood_number){
+                        item.neighborhood_name = neighborhood.neighborhood_name
+                    }
+                })
+            });
+            crimes.value = data;
+        })
+        .catch((error) => {
+            console.error('Error fetching data:', error);
+        });
+}
+
+function fetchNeighborhoodsFromAPI() {
+    let url = crime_url.value + '/neighborhoods';
+    console.log('fetchNeighborhoodsFromAPI: fetching:' + url);
+    fetch(url)
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            data.forEach((item) => {
+                neighborhoods.value.push(item);
+            })
+        })
+}
+
+//^^^^^^^^^^^^^^^CRIME API CODE^^^^^^^^^^^^^^^^^^^^
+
+//=================================================
+//=============INCIDENT SELECTION==================
+
 let selectedIncidentTypes = reactive([]);
 let selectedNeighborhoods = ref([]);
 let startDate = ref('');
@@ -234,50 +307,14 @@ fetch('http://localhost:8000/neighborhoods')
 
 
 function updateFilters() {
-    const apiUrl = constructApiUrl();
-    crime_url.value = apiUrl;
-    initializeCrimes();
+    fetchCrimesFromAPI(constructApiUrl());
 }
 
-function constructApiUrl() {
-    let apiUrl = 'http://localhost:8000/incidents?';
+//^^^^^^^^^^^^^^INCIDENT SELECTION^^^^^^^^^^^^^^^^^^
 
-    if (selectedIncidentTypes.length > 0) {
-        let codes = []
-        selectedIncidentTypes.forEach((type) => {
-            codes.push(incidentTypes[type]);
-        })
-        apiUrl += `code=${codes.join(',')}&`;
-    }
+//=================================================
+//============INCIDENT CREATION===================
 
-    if (selectedNeighborhoods.value.length > 0) {
-        apiUrl += `neighborhood=${selectedNeighborhoods.value.join(',')}&`;
-    }
-
-    if (startDate.value) {
-        apiUrl += `start_date=${startDate.value}&`;
-    }
-
-    if (endDate.value) {
-        apiUrl += `end_date=${endDate.value}&`;
-    }
-
-    if (maxIncidents.value) {
-        apiUrl += `limit=${maxIncidents.value}&`;
-    }
-
-    return apiUrl;
-}
-
-const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-function goto_lat_lon() {
-    map.center.lat = clamp(map.center.lat, st_paul_bounds.se.lat, st_paul_bounds.nw.lat);
-    map.center.lng = clamp(map.center.lng, st_paul_bounds.nw.lng, st_paul_bounds.se.lng);
-    let pos = [0, 0];
-    pos[0] = parseFloat(map.center.lat);
-    pos[1] = parseFloat(map.center.lng);
-    map.leaflet.flyTo(pos);
-}
 
 let newDate = ref('');
 let newTime = ref('');
@@ -298,13 +335,13 @@ function updateNewIncident() {
 }
 function generateNewIncident() {
     console.log(newDate.value);
-    if(!newDate.value || !newTime.value || !newIncident.value || !newPoliceGrid.value || !newNeighborhood.value || !newBlock.value) {
+    if (!newDate.value || !newTime.value || !newIncident.value || !newPoliceGrid.value || !newNeighborhood.value || !newBlock.value) {
         console.log("Field(s) empty")
         return "Field(s) empty";
-        
+
     } else {
         let caseNumber = 3213
-        const response = fetch('http://localhost:8000/new-incident', {
+        const response = fetch(crime_url.value + '/new-incident', {
             method: "PUT",
             mode: "cors",
             cache: "no-cache",
@@ -314,7 +351,7 @@ function generateNewIncident() {
             },
             redirect: "follow",
             referrerPolicy: "no-referrer",
-            body: JSON.stringify(caseNumber,newDate.value, newTime.value, newIncident.value, newPoliceGrid.value, newNeighborhood.value, newBlock.value),
+            body: JSON.stringify(caseNumber, newDate.value, newTime.value, newIncident.value, newPoliceGrid.value, newNeighborhood.value, newBlock.value),
         }).then((response => {
             console.log(response.json());
             return response.json();
@@ -322,6 +359,8 @@ function generateNewIncident() {
     }
 }
 
+
+//^^^^^^^^^^^^^^^^INCIDENT CREATION^^^^^^^^^^^^^^^^^^^^^^^
 //Only show crimes that occurred in neighborhoods visible on the map
 
 
@@ -374,22 +413,22 @@ function generateNewIncident() {
     </dialog>
     <div class="grid-container grid-padding-x">
         <template v-if="generateNewIncident">
-        <h2>Submit New Incident</h2>
-        <h3>Date</h3>
-        <input type="date" id="newDate" v-model="newDate"/>
-        <h3>Time</h3>
-        <input type="time" id="newTime" v-model="newTime"/>
-        <h3>Incident Type</h3>
-        <input id="newIncidentType" v-model="newIncidentType"/>
-        <h3>Incident</h3>
-        <input id="newIncident" v-model="newIncident"/>
-        <h3>Police Grid</h3>
-        <input type="number" id="newPoliceGrid" v-model="newPoliceGrid"/>
-        <h3>Neighborhood</h3>
-        <input type="number" id="newNeighborhood" v-model="newNeighborhood"/>
-        <h3>Block</h3>
-        <input id="newBlock" v-model="newBlock" @input="updateNewIncident, console.log(newBlock)"/>
-        <button class="button cell small-12 large-1" type='button' @click="generateNewIncident">Submit</button>
+            <h2>Submit New Incident</h2>
+            <h3>Date</h3>
+            <input type="date" id="newDate" v-model="newDate" />
+            <h3>Time</h3>
+            <input type="time" id="newTime" v-model="newTime" />
+            <h3>Incident Type</h3>
+            <input id="newIncidentType" v-model="newIncidentType" />
+            <h3>Incident</h3>
+            <input id="newIncident" v-model="newIncident" />
+            <h3>Police Grid</h3>
+            <input type="number" id="newPoliceGrid" v-model="newPoliceGrid" />
+            <h3>Neighborhood</h3>
+            <input type="number" id="newNeighborhood" v-model="newNeighborhood" />
+            <h3>Block</h3>
+            <input id="newBlock" v-model="newBlock" @input="updateNewIncident, console.log(newBlock)" />
+            <button class="button cell small-12 large-1" type='button' @click="generateNewIncident">Submit</button>
         </template>
     </div>
     <div class="grid-container grid-padding-x">
@@ -429,6 +468,7 @@ function generateNewIncident() {
             </tbody>
         </table>
     </div>
+    <a href="/aboutTheProject">/aboutTheProject</a>
 </template>
 
 <style>
