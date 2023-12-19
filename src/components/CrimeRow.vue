@@ -3,7 +3,7 @@ defineProps(['item']);
 </script>
 
 <template>
-  <tr>
+  <tr class="row">
     <td>{{ item.case_number }}</td>
     <td>{{ item.date }}</td>
     <td>{{ item.time }}</td>
