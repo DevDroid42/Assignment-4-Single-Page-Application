@@ -367,70 +367,66 @@ function generateNewIncident() {
 </script>
 
 <template>
-    <div class="grid-x grid-padding-x filter-controls">
-        <div class="cell large-3">
-            <h2>Incident Types</h2>
-            <div v-for="(codes, category) in incidentTypes" :key=category class="checkbox">
-                <input type="checkbox" :id="category" :value="category" v-model="selectedIncidentTypes"/>
-                <label :for="category">{{ category }}</label>
-            </div>
-        </div>
-
-        <div class="cell large-3">
-            <h2>Neighborhoods</h2>
-            <div v-for="neighborhood in neighborhoods" :key="neighborhood" class="checkbox">
-                <input type="checkbox" :id="neighborhood.neighborhood_number" :value="neighborhood.neighborhood_number"
-                    v-model="selectedNeighborhoods"/>
-                <label :for="neighborhood">{{ neighborhood.neighborhood_name }}</label>
-            </div>
-        </div>
-
-        <div class="cell large-3">
-            <h2>Date Range</h2>
-            <label for="startDate">Start Date:</label>
-            <input type="date" id="startDate" v-model="startDate"/>
-
-            <label for="endDate">End Date:</label>
-            <input type="date" id="endDate" v-model="endDate"/>
-        </div>
-
-        <div class="cell large-3">
-            <h2>Max Incidents</h2>
-            <input type="number" id="maxIncidents" v-model="maxIncidents"/>
-        </div>
-
-        <div class="cell large-12">
-            <button class="button" @click="updateFilters">Update</button>
-        </div>
-    </div>
-    <dialog id="rest-dialog" open>
+    <!-- <dialog id="rest-dialog" open>
         <h1 class="dialog-header">St. Paul Crime REST API</h1>
         <label class="dialog-label">URL: </label>
         <input id="dialog-url" class="dialog-input" type="url" v-model="crime_url" placeholder="http://localhost:8000" />
         <p class="dialog-error" v-if="dialog_err">Error: must enter valid URL</p>
         <br />
         <button class="button" type="button" @click="closeDialog">OK</button>
-    </dialog>
-    <div class="grid-container grid-padding-x">
-        <template v-if="generateNewIncident">
-            <h2>Submit New Incident</h2>
-            <h3>Date</h3>
-            <input type="date" id="newDate" v-model="newDate" />
-            <h3>Time</h3>
-            <input type="time" id="newTime" v-model="newTime" />
-            <h3>Incident Type</h3>
-            <input id="newIncidentType" v-model="newIncidentType" />
-            <h3>Incident</h3>
-            <input id="newIncident" v-model="newIncident" />
-            <h3>Police Grid</h3>
-            <input type="number" id="newPoliceGrid" v-model="newPoliceGrid" />
-            <h3>Neighborhood</h3>
-            <input type="number" id="newNeighborhood" v-model="newNeighborhood" />
-            <h3>Block</h3>
-            <input id="newBlock" v-model="newBlock" @input="updateNewIncident, console.log(newBlock)" />
-            <button class="button cell small-12 large-1" type='button' @click="generateNewIncident">Submit</button>
-        </template>
+    </dialog> -->
+    <div class="grid-container">
+        <div class="grid-x grid-padding-x">
+            <div class="cell">
+                <template v-if="generateNewIncident">
+                    <h2>Submit New Incident</h2>
+                    
+                    <div class="grid-x grid-padding-x">
+                        <div class="cell small-12 medium-6 large-3">
+                            <label for="newDate">Date</label>
+                            <input type="date" id="newDate" v-model="newDate" />
+                        </div>
+                        
+                        <div class="cell small-12 medium-6 large-3">
+                            <label for="newTime">Time</label>
+                            <input type="time" id="newTime" v-model="newTime" />
+                        </div>
+                        
+                        <div class="cell small-12 medium-6 large-3">
+                            <label for="newIncidentType">Incident Type</label>
+                            <input type='text' id="newIncidentType" v-model="newIncidentType" />
+                        </div>
+                        
+                        <div class="cell small-12 medium-6 large-3">
+                            <label for="newIncident">Incident</label>
+                            <input type='text' id="newIncident" v-model="newIncident" />
+                        </div>
+                        
+                        <div class="cell small-12 medium-6 large-3">
+                            <label for="newPoliceGrid">Police Grid</label>
+                            <input type="number" id="newPoliceGrid" v-model="newPoliceGrid" />
+                        </div>
+                        
+                        <div class="cell small-12 medium-6 large-3">
+                            <label for="newNeighborhood">Neighborhood</label>
+                            <input type="number" id="newNeighborhood" v-model="newNeighborhood" />
+                        </div>
+                        
+                        <div class="cell small-12 medium-6 large-3">
+                            <label for="newBlock">Block</label>
+                            <input type='text' id="newBlock" v-model="newBlock" @input="updateNewIncident" />
+                        </div>
+                    </div>
+                    
+                    <div class="cell small-12">
+                        <button class="button" type="button" @click="generateNewIncident">Submit</button>
+                    </div>
+                    
+                </template>
+            </div>
+        </div>
     </div>
+
     <div class="grid-container grid-padding-x">
         <div class="grid-x align-stretch">
             <h3 class="cell small-12 large-12" style="text-align: center; background-color: rgb(240, 242, 255);">Address
@@ -452,6 +448,57 @@ function generateNewIncident() {
         <div class="grid-x grid-padding-x">
             <div id="leafletmap" class="cell auto"></div>
         </div>
+        <div class="grid-container">
+            <div class="grid-x grid-padding-x">
+                <div class="cell large-12">
+                    <h2>Incident Type</h2>
+                    <div class="grid-x grid-margin-x">
+                        <div class="cell small-12 medium-6 large-4" v-for="(codes, category) in incidentTypes" :key=category>
+                            <input type="checkbox" :id="category" :value="category" v-model="selectedIncidentTypes" />
+                            <label :for="category">{{ category }}</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cell large-12">
+                    <h2>Neighborhood Names</h2>
+                    <div class="grid-x grid-margin-x">
+                        <div class="cell small-12 medium-6 large-4" v-for="neighborhood in neighborhoods" :key="neighborhood">
+                            <input type="checkbox" :id="neighborhood.neighborhood_number" :value="neighborhood.neighborhood_number"
+                                v-model="selectedNeighborhoods" />
+                            <label :for="neighborhood.neighborhood_number">{{ neighborhood.neighborhood_name }}</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cell large-12">
+                    <h2>Date Range</h2>
+                    <div class="grid-x grid-margin-x">
+                        <div class="cell medium-6">
+                            <label for="startDate">Start Date:</label>
+                            <input type="date" id="startDate" v-model="startDate" />
+                        </div>
+                        <div class="cell medium-6">
+                            <label for="endDate">End Date:</label>
+                            <input type="date" id="endDate" v-model="endDate" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- If there is a requirement for Time Range, you can add similar structure to Date Range. -->
+            
+                <div class="cell large-12">
+                    <h2>Max Incidents</h2>
+                    <input type="number" id="maxIncidents" v-model="maxIncidents" />
+                </div>
+
+                <div class="cell large-12">
+                    <button class="button" @click="updateFilters">Update</button>
+                </div>
+        </div>
+    </div>
+
+
         <table class="crime-table">
             <thead>
                 <th>Case Number</th>
@@ -499,5 +546,29 @@ function generateNewIncident() {
 .dialog-error {
     font-size: 1rem;
     color: #D32323;
+}
+
+.checkbox label {
+    margin-left: 0.5rem;
+}
+
+.cell {
+    margin-bottom: 1rem; 
+}
+
+.button {
+    width: 100%; 
+    margin-top: 1rem;
+}
+
+input[type="date"], input[type="text"] {
+    width: 100%;
+    padding: .5rem;
+    border: 1px solid #ccc;
+    border-radius: 0;
+}
+
+input[type="checkbox"] {
+    margin-right: 0.5rem;
 }
 </style>
