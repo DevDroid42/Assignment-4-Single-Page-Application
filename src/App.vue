@@ -361,8 +361,12 @@ let newIncident = ref('');
 let newPoliceGrid = ref('');
 let newNeighborhood = ref('');
 let newBlock = ref('');
+let newCode = ref('');
+let newCaseNumber = ref('');
 
 function updateNewIncident() {
+    newCaseNumber.value = this.newCaseNumber;
+    newCode.value = this.newCode;
     newDate.value = this.newDate;
     newTime.value = this.newTime;
     newIncidentType.value = this.newIncidentType;
@@ -372,14 +376,13 @@ function updateNewIncident() {
     newBlock.value = this.newBlock;
 }
 function generateNewIncident() {
-    if (!newDate.value || !newTime.value || !newIncident.value || !newPoliceGrid.value || !newNeighborhood.value || !newBlock.value) {
+    if (!newCaseNumber.value || !newCode.value || !newDate.value || !newTime.value || !newIncident.value || !newPoliceGrid.value || !newNeighborhood.value || !newBlock.value) {
         let emptyFields = 1;
         console.log("Field(s) empty")
         return "Field(s) empty";
 
     } else {
         let emptyFields = 0;
-        let caseNumber = '3213';
         const response = fetch(crime_url.value + '/new-incident', {
             method: "PUT",
             mode: "cors",
@@ -391,7 +394,7 @@ function generateNewIncident() {
             },
             redirect: "follow",
             referrerPolicy: "no-referrer",
-            body: JSON.stringify({case_number : caseNumber, date: newDate.value, time:newTime.value, incident:newIncident.value, police_grid:newPoliceGrid.value, neighborhood_number:newNeighborhood.value, block:newBlock.value}),
+            body: JSON.stringify({case_number : newCaseNumber.value, date: newDate.value, time:newTime.value, code:newCode.value, incident:newIncident.value, police_grid:newPoliceGrid.value, neighborhood_number:newNeighborhood.value, block:newBlock.value}),
         }).then((response => {
             return response;
         })).catch((error) => {
@@ -424,6 +427,10 @@ function generateNewIncident() {
                     <p v-if="emptyFields=1">Field(s) are empty!</p>
                     <div class="grid-x grid-padding-x">
                         <div class="cell small-12 medium-6 large-3">
+                            <label for="newCaseNumber">Case Number</label>
+                            <input type='text' id="newCaseNumber" v-model="newCaseNumber"/>
+                        </div>
+                        <div class="cell small-12 medium-6 large-3">
                             <label for="newDate">Date</label>
                             <input type="date" id="newDate" v-model="newDate" />
                         </div>
@@ -434,8 +441,8 @@ function generateNewIncident() {
                         </div>
                         
                         <div class="cell small-12 medium-6 large-3">
-                            <label for="newIncidentType">Incident Type</label>
-                            <input type='text' id="newIncidentType" v-model="newIncidentType" />
+                            <label for="newCode">Code</label>
+                            <input type='number' id="newCode" v-model="newCode" />
                         </div>
                         
                         <div class="cell small-12 medium-6 large-3">
