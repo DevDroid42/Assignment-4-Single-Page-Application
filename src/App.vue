@@ -1,9 +1,16 @@
 <script setup>
 /* global L*/
-import { reactive, ref, onMounted} from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 import CrimeRow from './components/CrimeRow.vue';
 
-
+const redIcon = new L.Icon({
+  iconUrl: 'data/marker-icon-2x-red.png',
+  shadowUrl: 'data/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
 
 let search_address = ref('');
 let crime_url = ref('http://localhost:8000');
@@ -77,10 +84,10 @@ onMounted(() => {
         search_address.value = "loading";
         let neighborhoodsInView = []
         map.leaflet.eachLayer((layer) => {
-            if(layer instanceof L.Marker) {
-                if(map.leaflet.getBounds().contains(layer.getLatLng())) {
+            if (layer instanceof L.Marker) {
+                if (map.leaflet.getBounds().contains(layer.getLatLng())) {
                     map.neighborhood_markers.filter((item, index) => {
-                        if(item.location[0] == layer.getLatLng().lat && item.location[1] == layer.getLatLng().lng){
+                        if (item.location[0] == layer.getLatLng().lat && item.location[1] == layer.getLatLng().lng) {
                             neighborhoodsInView.push(neighborhoods.value[index].neighborhood_number);
                         }
                     })
@@ -161,27 +168,32 @@ function nominatim_api_request(request) {
     });
 }
 
+//focuses on address, also returns a promise to the lat,lon for other uses
 function focus_on_address() {
-    nominatim_api_request('https://nominatim.openstreetmap.org/search?q=' + search_address.value + '&format=json&limit=1').then(data => {
-        if (data.length == 0) {
-            console.log("no address found");
-            return;
-        }
-        let pos = [0, 0];
-        pos[0] = parseFloat(data[0].lat);
-        pos[1] = parseFloat(data[0].lon);
-        if (pos[0] < st_paul_bounds.se.lat || pos[0] > st_paul_bounds.nw.lat || pos[1] > st_paul_bounds.se.lon || pos[1] < st_paul_bounds.nw.lon) {
-            console.log("outside bounds");
-            return;
-        }
-        let bounds = [[0, 0], [0, 0]];
-        bounds[0][0] = parseFloat(data[0].boundingbox[0]);
-        bounds[0][1] = parseFloat(data[0].boundingbox[3]);
-        bounds[1][0] = parseFloat(data[0].boundingbox[1]);
-        bounds[1][1] = parseFloat(data[0].boundingbox[2]);
-        map.leaflet.flyToBounds(bounds);
-    }).catch((error) => {
-        console.log(error);
+    return new Promise((resolve, reject) => {
+        nominatim_api_request('https://nominatim.openstreetmap.org/search?q=' + search_address.value + '&format=json&limit=1').then(data => {
+            if (data.length == 0) {
+                console.log("no address found");
+                return;
+            }
+            let pos = [0, 0];
+            pos[0] = parseFloat(data[0].lat);
+            pos[1] = parseFloat(data[0].lon);
+            if (pos[0] < st_paul_bounds.se.lat || pos[0] > st_paul_bounds.nw.lat || pos[1] > st_paul_bounds.se.lon || pos[1] < st_paul_bounds.nw.lon) {
+                console.log("outside bounds");
+                return;
+            }
+            let bounds = [[0, 0], [0, 0]];
+            bounds[0][0] = parseFloat(data[0].boundingbox[0]);
+            bounds[0][1] = parseFloat(data[0].boundingbox[3]);
+            bounds[1][0] = parseFloat(data[0].boundingbox[1]);
+            bounds[1][1] = parseFloat(data[0].boundingbox[2]);
+            map.leaflet.flyToBounds(bounds);
+            resolve(pos);
+        }).catch((error) => {
+            console.log(error);
+            reject(error);
+        });
     });
 }
 
@@ -200,7 +212,7 @@ function goto_lat_lon() {
 //=========================================
 //==============CRIME API CODE=============
 function constructApiUrl() {
-    let apiUrl = crime_url.value+'/incidents?';
+    let apiUrl = crime_url.value + '/incidents?';
 
     if (selectedIncidentTypes.length > 0) {
         let codes = []
@@ -241,7 +253,7 @@ function fetchCrimesFromAPI(url) {
         .then((data) => {
             data.forEach((item) => {
                 neighborhoods.value.filter((neighborhood) => {
-                    if(neighborhood.neighborhood_number == item.neighborhood_number){
+                    if (neighborhood.neighborhood_number == item.neighborhood_number) {
                         item.neighborhood_name = neighborhood.neighborhood_name
                     }
                 })
@@ -308,6 +320,32 @@ fetch('http://localhost:8000/neighborhoods')
 
 function updateFilters() {
     fetchCrimesFromAPI(constructApiUrl());
+}
+
+function convertToValidAddress(addressWithX) {
+    let sections = addressWithX.split(' ');
+    sections[0] = sections[0].replaceAll('X', '0');
+    let retVal = "";
+    for (let i = 0; i < sections.length; i++) {
+        retVal += sections[i] + " ";
+    }
+    return retVal.substring(0, retVal.length - 1);
+}
+
+
+let currMarker = L.marker([0, 0]);
+function placeMarker(crime) {
+    console.log(crime);
+    search_address.value = convertToValidAddress(crime.block) + " St Paul Minnesota United States";
+    let position = [];
+    focus_on_address().then(pos => {
+        if (map.leaflet.hasLayer(currMarker)) {
+           map.leaflet.removeLayer(currMarker);
+        }
+        position = pos;
+        currMarker = L.marker(position, {icon: redIcon});
+        currMarker.addTo(map.leaflet).bindPopup(crime.date + "\n" + crime.time + "\n" + crime.incident);
+    });
 }
 
 //^^^^^^^^^^^^^^INCIDENT SELECTION^^^^^^^^^^^^^^^^^^
@@ -511,7 +549,7 @@ function generateNewIncident() {
                 <th>Block</th>
             </thead>
             <tbody>
-                <CrimeRow v-for="(crime, index) in crimes" :item=crime :key=index></CrimeRow>
+                <CrimeRow v-for="(crime, index) in crimes" :item=crime :key=index @click="placeMarker(crime)"></CrimeRow>
             </tbody>
         </table>
     </div>
