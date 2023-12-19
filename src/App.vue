@@ -306,7 +306,7 @@ const incidentTypes = {
 };
 const neighborhoods = ref([]);
 
-fetch('http://localhost:8000/neighborhoods')
+fetch(crime_url.value+'/neighborhoods')
     .then((response) => {
         return response.json();
     })
@@ -372,13 +372,14 @@ function updateNewIncident() {
     newBlock.value = this.newBlock;
 }
 function generateNewIncident() {
-    console.log(newDate.value);
     if (!newDate.value || !newTime.value || !newIncident.value || !newPoliceGrid.value || !newNeighborhood.value || !newBlock.value) {
+        let emptyFields = 1;
         console.log("Field(s) empty")
         return "Field(s) empty";
 
     } else {
-        let caseNumber = 3213
+        let emptyFields = 0;
+        let caseNumber = '3213';
         const response = fetch(crime_url.value + '/new-incident', {
             method: "PUT",
             mode: "cors",
@@ -386,14 +387,16 @@ function generateNewIncident() {
             credentials: "same-origin",
             headers: {
                 "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
             },
             redirect: "follow",
             referrerPolicy: "no-referrer",
-            body: JSON.stringify(caseNumber, newDate.value, newTime.value, newIncident.value, newPoliceGrid.value, newNeighborhood.value, newBlock.value),
+            body: JSON.stringify({case_number : caseNumber, date: newDate.value, time:newTime.value, code: , incident:newIncident.value, police_grid:newPoliceGrid.value, neighborhood_number:newNeighborhood.value, block:newBlock.value}),
         }).then((response => {
-            console.log(response.json());
-            return response.json();
-        }));
+            return response;
+        })).catch((error) => {
+            console.log('Error:', error);
+        });  
     }
 }
 
@@ -418,7 +421,7 @@ function generateNewIncident() {
             <div class="cell">
                 <template v-if="generateNewIncident">
                     <h2>Submit New Incident</h2>
-                    
+                    <p v-if="emptyFields=1">Field(s) are empty!</p>
                     <div class="grid-x grid-padding-x">
                         <div class="cell small-12 medium-6 large-3">
                             <label for="newDate">Date</label>
