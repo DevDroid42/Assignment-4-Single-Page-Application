@@ -536,8 +536,24 @@ function generateNewIncident() {
         </div>
     </div>
 
+        <div class="legend">
+            <h3>Legend:</h3>
+            <div class="legend-item">
+                <span class="icon violent"></span>
+                <label>Violent</label>
+            </div>
+            <div class="legend-item">
+                <span class="icon property"></span>
+                <label>Property</label>
+            </div>
+            <div class="legend-item">
+                <span class="icon other"></span>
+                <label>Other</label>
+            </div>
+        </div>
 
-        <table class="crime-table">
+
+        <table>
             <thead>
                 <th>Case Number</th>
                 <th>Date</th>
