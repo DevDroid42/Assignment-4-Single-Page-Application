@@ -152,7 +152,7 @@ function nominatim_api_request(request) {
             reject("Call already in progress");
             return;
         }
-        let time = Math.max(3000 - (new Date() - last_nominatim_call), 0);
+        let time = Math.max(1100 - (new Date() - last_nominatim_call), 0);
         call_running = true;
         setTimeout(() => {
             last_nominatim_call = new Date();
@@ -420,63 +420,8 @@ function generateNewIncident() {
         <button class="button" type="button" @click="closeDialog">OK</button>
     </dialog> -->
 
-    <div class="grid-container">
-        <div class="grid-x grid-padding-x">
-            <div class="cell">
-                <template v-if="generateNewIncident">
-                    <h2>Submit New Incident</h2>
-                    <p v-if="emptyFields = 1">Field(s) are empty!</p>
-                    <div class="grid-x grid-padding-x">
-                        <div class="cell small-12 medium-6 large-3">
-                            <label for="newCaseNumber">Case Number</label>
-                            <input type='text' id="newCaseNumber" v-model="newCaseNumber" />
-                        </div>
-                        <div class="cell small-12 medium-6 large-3">
-                            <label for="newDate">Date</label>
-                            <input type="date" id="newDate" v-model="newDate" />
-                        </div>
-
-                        <div class="cell small-12 medium-6 large-3">
-                            <label for="newTime">Time</label>
-                            <input type="time" id="newTime" v-model="newTime" />
-                        </div>
-
-                        <div class="cell small-12 medium-6 large-3">
-                            <label for="newCode">Code</label>
-                            <input type='number' id="newCode" v-model="newCode" />
-                        </div>
-
-                        <div class="cell small-12 medium-6 large-3">
-                            <label for="newIncident">Incident</label>
-                            <input type='text' id="newIncident" v-model="newIncident" />
-                        </div>
-
-                        <div class="cell small-12 medium-6 large-3">
-                            <label for="newPoliceGrid">Police Grid</label>
-                            <input type="number" id="newPoliceGrid" v-model="newPoliceGrid" />
-                        </div>
-
-                        <div class="cell small-12 medium-6 large-3">
-                            <label for="newNeighborhood">Neighborhood</label>
-                            <input type="number" id="newNeighborhood" v-model="newNeighborhood" />
-                        </div>
-
-                        <div class="cell small-12 medium-6 large-3">
-                            <label for="newBlock">Block</label>
-                            <input type='text' id="newBlock" v-model="newBlock" @input="updateNewIncident" />
-                        </div>
-                    </div>
-
-                    <div class="cell small-12">
-                        <button class="button" type="button" @click="generateNewIncident">Submit</button>
-                    </div>
-
-                </template>
-            </div>
-        </div>
-    </div>
-
     <div class="grid-x">
+        
         <div class="cell large-2">
             <div class="cell large-12">
                 <h3 style="text-align: center;">Incident Type</h3>
@@ -520,6 +465,57 @@ function generateNewIncident() {
 
         </div>
         <div class="cell large-10 small-12">
+            <div class="cell large-12" style="background-color: rgba(166, 166, 166, 0.281);">
+                <template v-if="generateNewIncident">
+                    <div class="grid-x grid-padding-x">
+                        <h4 class="cell large-12" style="text-align: center;">Submit New Incident</h4>
+                        <div class="cell small-12 medium-6 large-3">
+                            <label for="newCaseNumber">Case Number</label>
+                            <input type='text' id="newCaseNumber" v-model="newCaseNumber" />
+                        </div>
+                        <div class="cell small-12 medium-6 large-3">
+                            <label for="newDate">Date</label>
+                            <input type="date" id="newDate" v-model="newDate" />
+                        </div>
+
+                        <div class="cell small-12 medium-6 large-3">
+                            <label for="newTime">Time</label>
+                            <input type="time" id="newTime" v-model="newTime" />
+                        </div>
+
+                        <div class="cell small-12 medium-6 large-3">
+                            <label for="newCode">Code</label>
+                            <input type='number' id="newCode" v-model="newCode" />
+                        </div>
+
+                        <div class="cell small-12 medium-6 large-3">
+                            <label for="newIncident">Incident</label>
+                            <input type='text' id="newIncident" v-model="newIncident" />
+                        </div>
+
+                        <div class="cell small-12 medium-6 large-3">
+                            <label for="newPoliceGrid">Police Grid</label>
+                            <input type="number" id="newPoliceGrid" v-model="newPoliceGrid" />
+                        </div>
+
+                        <div class="cell small-12 medium-6 large-3">
+                            <label for="newNeighborhood">Neighborhood</label>
+                            <input type="number" id="newNeighborhood" v-model="newNeighborhood" />
+                        </div>
+
+                        <div class="cell small-12 medium-6 large-3">
+                            <label for="newBlock">Block</label>
+                            <input type='text' id="newBlock" v-model="newBlock" @input="updateNewIncident" />
+                        </div>
+
+                        <p class="cell large-6" v-if="emptyFields = 1">Field(s) are empty!</p>
+                        <button class="button cell large-6" type="button" @click="generateNewIncident">Submit</button>
+                    </div>
+
+                   
+
+                </template>
+            </div>
             <div class="grid-x align-justify">
                 <h4 class="cell small-12 large-12" style="text-align: center;">
                     Address
