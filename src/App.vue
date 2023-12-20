@@ -1,7 +1,7 @@
 <script setup>
 /* global L*/
 import { reactive, ref, onMounted } from 'vue'
-import CrimeRow  from './components/CrimeRow.vue'
+import CrimeRow from './components/CrimeRow.vue'
 
 const redIcon = new L.Icon({
     iconUrl: 'data/marker-icon-2x-red.png',
@@ -419,26 +419,6 @@ function generateNewIncident() {
         <br />
         <button class="button" type="button" @click="closeDialog">OK</button>
     </dialog> -->
-    <button class="button" type="button" data-toggle="example-dropdown">Toggle Dropdown</button>
-    <div class="dropdown-pane" id="example-dropdown" data-dropdown data-auto-focus="true">
-        Example form in a dropdown.
-        <form>
-            <div class="grid-container">
-                <div class="grid-x grid-margin-x">
-                    <div class="cell medium-6">
-                        <label>Name
-                            <input type="text" placeholder="Kirk, James T.">
-                        </label>
-                    </div>
-                    <div class="cell medium-6">
-                        <label>Rank
-                            <input type="text" placeholder="Captain">
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </form>
-    </div>
 
     <div class="grid-container">
         <div class="grid-x grid-padding-x">
@@ -556,22 +536,25 @@ function generateNewIncident() {
                 <input id="longitude" class="cell small-10 large-3" v-model="map.center.lng" placeholder="lat" />
                 <button class="button cell small-12 large-1" type='button' @click="goto_lat_lon">Go</button>
             </div>
-            <div id="leafletmap"></div>
-            <div class="legend">
-                <h3>Legend:</h3>
-                <div class="legend-item">
-                    <span class="icon violent"></span>
-                    <label>Violent</label>
-                </div>
-                <div class="legend-item">
-                    <span class="icon property"></span>
-                    <label>Property</label>
-                </div>
-                <div class="legend-item">
-                    <span class="icon other"></span>
-                    <label>Other</label>
+            <div class="grid-x">
+                <div id="leafletmap" class="cell large-11 small-12"></div>
+                <div class="legend cell large-1">
+                    <h3>Legend:</h3>
+                    <div class="legend-item">
+                        <span class="icon violent"></span>
+                        <label>Violent</label>
+                    </div>
+                    <div class="legend-item">
+                        <span class="icon property"></span>
+                        <label>Property</label>
+                    </div>
+                    <div class="legend-item">
+                        <span class="icon other"></span>
+                        <label>Other</label>
+                    </div>
                 </div>
             </div>
+
             <table class="crime-table">
                 <thead>
                     <th>Case Number</th>
@@ -584,7 +567,8 @@ function generateNewIncident() {
                     <th>Block</th>
                 </thead>
                 <tbody>
-                    <CrimeRow v-for="(crime, index) in crimes" :item=crime :key=index @click="placeMarker(crime)"></CrimeRow>
+                    <CrimeRow v-for="(crime, index) in crimes" :item=crime :key=index @click="placeMarker(crime)">
+                    </CrimeRow>
                 </tbody>
             </table>
         </div>
