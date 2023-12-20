@@ -3,6 +3,7 @@ import { ref } from 'vue'
 
 const props = defineProps(['item']);
 let crime_url = ref('http://localhost:8000');
+let display_row = ref(true);
 
 function classifyCrime(crimeCode) {
 
@@ -43,13 +44,15 @@ function removeIncident(){
         redirect: "follow",
         referrerPolicy: "no-referrer",
         body: JSON.stringify({case_number: props.item.case_number})
+    }).then(() => {
+        display_row.value = false;
     })
 }
 
 </script>
 
 <template>
-  <tr :class="'row ' + classifyCrime(item.code)">
+  <tr v-if="display_row" :class="'row ' + classifyCrime(item.code)">
     <td>{{ item.case_number }}</td>
     <td>{{ item.date }}</td>
     <td>{{ item.time }}</td>
