@@ -1,7 +1,6 @@
 <script setup>
 /* global L*/
-import { reactive, ref, onMounted } from 'vue'
-import CrimeRow from './components/CrimeRow.vue';
+import { reactive, ref, onMounted, VueElement } from 'vue'
 
 const redIcon = new L.Icon({
     iconUrl: 'data/marker-icon-2x-red.png',
@@ -419,7 +418,27 @@ function generateNewIncident() {
         <br />
         <button class="button" type="button" @click="closeDialog">OK</button>
     </dialog> -->
-    
+    <button class="button" type="button" data-toggle="example-dropdown">Toggle Dropdown</button>
+    <div class="dropdown-pane" id="example-dropdown" data-dropdown data-auto-focus="true">
+        Example form in a dropdown.
+        <form>
+            <div class="grid-container">
+                <div class="grid-x grid-margin-x">
+                    <div class="cell medium-6">
+                        <label>Name
+                            <input type="text" placeholder="Kirk, James T.">
+                        </label>
+                    </div>
+                    <div class="cell medium-6">
+                        <label>Rank
+                            <input type="text" placeholder="Captain">
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
     <div class="grid-container">
         <div class="grid-x grid-padding-x">
             <div class="cell">
@@ -520,22 +539,20 @@ function generateNewIncident() {
 
         </div>
         <div class="cell large-10 small-12">
-            <div class="grid-x align-stretch">
-                <h3 class="cell small-12 large-12" style="text-align: center; background-color: rgb(240, 242, 255);">
+            <div class="grid-x align-justify">
+                <h4 class="cell small-12 large-12" style="text-align: center;">
                     Address
-                </h3>
-                <input id="addressDialog" class="dialog-input cell small-12 large-11" v-model="search_address"
+                </h4>
+                <input id="addressDialog" class="cell small-12 large-11" v-model="search_address"
                     placeholder="2115 Summit Ave, Saint Paul, MN 55105, United States" />
                 <button class="button cell small-12 large-1" type='button' @click="focus_on_address">Search</button>
 
-                <h3 class="cell small-12 large-12" style="text-align: center; background-color: rgb(240, 242, 255);">Geo
-                    Location</h3>
+                <h4 class="cell small-12 large-12" style="text-align: center;">Geo
+                    Location</h4>
                 <label class="label cell small-2 large-2">latitude</label>
-                <input id="latitude" class="dialog-input cell small-10 large-3" v-model="map.center.lat"
-                    placeholder="lat" />
+                <input id="latitude" class="cell small-10 large-3" v-model="map.center.lat" placeholder="lat" />
                 <label class="label cell small-2 large-2">longitude</label>
-                <input id="longitude" class="dialog-input cell small-10 large-3" v-model="map.center.lng"
-                    placeholder="lat" />
+                <input id="longitude" class="cell small-10 large-3" v-model="map.center.lng" placeholder="lat" />
                 <button class="button cell small-12 large-1" type='button' @click="goto_lat_lon">Go</button>
             </div>
             <div id="leafletmap"></div>
@@ -556,7 +573,6 @@ function generateNewIncident() {
                 </tbody>
             </table>
         </div>
-
     </div>
 
 
@@ -597,13 +613,13 @@ function generateNewIncident() {
     margin-left: 0.5rem;
 }
 
-.cell {
-    margin-bottom: 1rem;
-}
-
 .button {
     width: 100%;
-    margin-top: 1rem;
+    margin: auto;
+}
+
+label {
+    text-align: center;
 }
 
 input[type="date"],
@@ -616,5 +632,14 @@ input[type="text"] {
 
 input[type="checkbox"] {
     margin-right: 0.5rem;
+    margin-left: 0.5rem;
+}
+
+h4 {
+    font-size: 1.3rem;
+    margin: 0;
+    margin-top: 0.5rem;
+    background-color: rgb(145, 195, 228);
+    color: black;
 }
 </style>
