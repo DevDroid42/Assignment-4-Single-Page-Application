@@ -1,0 +1,59 @@
+* {
+    margin: 0 auto;
+}
+
+html {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 100%;
+    width: 100%;
+    height: 100%;
+}
+
+.row {
+    cursor:pointer;
+}
+
+.row:hover {
+    outline: 1px solid black;
+}
+
+.row:active {
+    outline: 3px solid black;
+}
+
+.violent, .violent:nth-of-type(even), .violent:nth-of-type(odd) {
+    background-color: rgb(218, 91, 91);
+}
+
+.property, .property:nth-of-type(even), .property:nth-of-type(odd){
+    background-color: rgb(233, 183, 90);
+}
+
+.other, .other:nth-of-type(even), .other:nth-of-type(odd) {
+    background-color: rgb(241, 241, 138);
+}
+
+.legend {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f8f8f8;
+    margin-bottom: 20px;
+}
+
+.legend h3 {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+.legend-item {
+    display: inline-block;
+    margin: 8px;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    display: inline-block;
+}
