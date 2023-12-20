@@ -8,7 +8,7 @@ let display_row = ref(true);
 function classifyCrime(crimeCode) {
 
   
-    if ((100 < crimeCode && crimeCode <= 120) || crimeCode === 3100) {
+    if ((100 <= crimeCode && crimeCode <= 120) || crimeCode === 3100) {
         return "violent";
     } else if (300 < crimeCode && crimeCode <= 374) {
         return "violent";
@@ -16,7 +16,7 @@ function classifyCrime(crimeCode) {
         return "violent";
     } else if (500 <= crimeCode && crimeCode <= 566) {
         return "property";
-    } else if (600 <= crimeCode && crimeCode <= 693 && crimeCode == 100) {
+    } else if (600 <= crimeCode && crimeCode <= 693) {
         return "property";
     } else if (700 <= crimeCode && crimeCode <= 732) {
         return "property";
