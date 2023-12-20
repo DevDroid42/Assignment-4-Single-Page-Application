@@ -6,7 +6,7 @@ function classifyCrime(crimeCode) {
   
     if ((100 <= crimeCode && crimeCode <= 120) || crimeCode === 3100) {
         return "violent";
-    } else if (300 <= crimeCode && crimeCode <= 374) {
+    } else if (300 < crimeCode && crimeCode <= 374) {
         return "violent";
     } else if (400 <= crimeCode && crimeCode <= 453) {
         return "violent";
