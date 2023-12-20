@@ -204,18 +204,18 @@ app.put('/new-incident', (req, res) => {
 
 // DELETE request handler for new crime incident
 app.delete('/remove-incident', (req, res) => {
-    console.log(req.query); // query object (key-value pairs after the ? in the url)
-    if(!Object.hasOwn(req.query, 'case_number')){
+    console.log(req.body); // query object (key-value pairs after the ? in the url)
+    if(!Object.hasOwn(req.body, 'case_number')){
         res.status(400).type('text').send("missing case number");
     }
     let sqlQuery = sqlGen.select().from('Incidents').where({case_number: '?'});
     let sqlDelete = sqlGen.remove().from('Incidents').where({case_number: '?'});
     
-    dbSelect(sqlQuery.build(), [req.query.case_number]).then(values => {
+    dbSelect(sqlQuery.build(), [req.body.case_number]).then(values => {
         if(values.length == 0){
             res.status(500).type('text').send('case not found');
         }else{
-            dbRun(sqlDelete.build(), [req.query.case_number]).then(response => {
+            dbRun(sqlDelete.build(), [req.body.case_number]).then(response => {
                 res.status(200).type('json').send(values);
             }).catch(err => {
                 res.status(500).type('text').send(err);

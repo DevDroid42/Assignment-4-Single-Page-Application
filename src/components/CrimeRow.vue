@@ -1,10 +1,13 @@
 <script setup>
-defineProps(['item']);
+import { ref } from 'vue'
+
+const props = defineProps(['item']);
+let crime_url = ref('http://localhost:8000');
 
 function classifyCrime(crimeCode) {
 
   
-    if ((100 <= crimeCode && crimeCode <= 120) || crimeCode === 3100) {
+    if ((100 < crimeCode && crimeCode <= 120) || crimeCode === 3100) {
         return "violent";
     } else if (300 < crimeCode && crimeCode <= 374) {
         return "violent";
@@ -12,7 +15,7 @@ function classifyCrime(crimeCode) {
         return "violent";
     } else if (500 <= crimeCode && crimeCode <= 566) {
         return "property";
-    } else if (600 <= crimeCode && crimeCode <= 693) {
+    } else if (600 <= crimeCode && crimeCode <= 693 && crimeCode == 100) {
         return "property";
     } else if (700 <= crimeCode && crimeCode <= 732) {
         return "property";
@@ -27,6 +30,22 @@ function classifyCrime(crimeCode) {
     }
 }
 
+function removeIncident(){
+    fetch(crime_url.value+='/remove-incident', {
+        method: "DELETE",
+        mode: "cors",
+        cache: "no-cache",
+        credentials: "same-origin",
+        headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+        },
+        redirect: "follow",
+        referrerPolicy: "no-referrer",
+        body: JSON.stringify({case_number: props.item.case_number})
+    })
+}
+
 </script>
 
 <template>
@@ -39,6 +58,7 @@ function classifyCrime(crimeCode) {
     <td>{{ item.police_grid }}</td>
     <td>{{ item.neighborhood_name }}</td>
     <td>{{ item.block }}</td>
+    <td><button type="button" class="button table-delete" @click="removeIncident">Delete</button></td>
   </tr>
 </template>
 
