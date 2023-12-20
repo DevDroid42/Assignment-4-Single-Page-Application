@@ -291,7 +291,7 @@ let maxIncidents = ref('');
 
 const incidentTypes = {
     "Homicide": [100, 110, 120, 3100],
-    "Robbery": [300, 311, 312, 313, 314, 321, 322, 323, 324, 331, 332, 333, 334, 341, 342, 343, 344, 351, 352, 353, 354, 361, 362, 363, 364, 371, 372, 373, 374],
+    "Robbery": [311, 312, 313, 314, 321, 322, 323, 324, 331, 332, 333, 334, 341, 342, 343, 344, 351, 352, 353, 354, 361, 362, 363, 364, 371, 372, 373, 374],
     "Aggravated Assault": [400, 410, 411, 412, 420, 421, 422, 430, 431, 432, 440, 441, 442, 450, 451, 452, 453],
     "Burglary": [500, 510, 511, 513, 515, 516, 520, 521, 523, 525, 526, 530, 531, 533, 535, 536, 540, 541, 543, 545, 546, 550, 551, 553, 555, 556, 560, 561, 563, 565, 566],
     "Theft": [600, 601, 603, 611, 612, 613, 614, 621, 622, 623, 630, 631, 632, 633, 640, 641, 642, 643, 651, 652, 653, 661, 662, 663, 671, 672, 673, 681, 682, 683, 691, 692, 693],
@@ -301,7 +301,7 @@ const incidentTypes = {
     "Criminal Damage to Property": [1400, 1401, 1410, 1415, 1416, 1420, 1425, 1426, 1430, 1435, 1436],
     "Narcotics": [1800, 1810, 1811, 1812, 1813, 1814, 1815, 1820, 1822, 1823, 1824, 1825, 1830, 1835, 1840, 1841, 1842, 1843, 1844, 1845, 1850, 1855, 1860, 1865, 1870, 1880, 1885],
     "Weapons": [2619],
-    "Proactive Policing": [9954, 9959, 9986]
+    "Proactive Policing": [300, 9954, 9959, 9986]
 };
 const neighborhoods = ref([]);
 
@@ -556,6 +556,21 @@ function generateNewIncident() {
                 <button class="button cell small-12 large-1" type='button' @click="goto_lat_lon">Go</button>
             </div>
             <div id="leafletmap"></div>
+            <div class="legend">
+                <h3>Legend:</h3>
+                <div class="legend-item">
+                    <span class="icon violent"></span>
+                    <label>Violent</label>
+                </div>
+                <div class="legend-item">
+                    <span class="icon property"></span>
+                    <label>Property</label>
+                </div>
+                <div class="legend-item">
+                    <span class="icon other"></span>
+                    <label>Other</label>
+                </div>
+            </div>
             <table class="crime-table">
                 <thead>
                     <th>Case Number</th>
@@ -568,8 +583,7 @@ function generateNewIncident() {
                     <th>Block</th>
                 </thead>
                 <tbody>
-                    <CrimeRow v-for="(crime, index) in crimes" :item=crime :key=index @click="placeMarker(crime)">
-                    </CrimeRow>
+                    <CrimeRow v-for="(crime, index) in crimes" :item=crime :key=index @click="placeMarker(crime)"></CrimeRow>
                 </tbody>
             </table>
         </div>
@@ -591,7 +605,7 @@ function generateNewIncident() {
 }
 
 .dialog-header {
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: bold;
 }
 
