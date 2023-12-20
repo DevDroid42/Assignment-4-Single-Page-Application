@@ -1,6 +1,7 @@
 <script setup>
 /* global L*/
-import { reactive, ref, onMounted, VueElement } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
+import CrimeRow  from './components/CrimeRow.vue'
 
 const redIcon = new L.Icon({
     iconUrl: 'data/marker-icon-2x-red.png',
