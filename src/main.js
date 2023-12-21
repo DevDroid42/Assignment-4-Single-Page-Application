@@ -7,8 +7,7 @@ import about from './aboutProject.vue'
 const router = createRouter({
     history: createWebHistory(),
     routes: [
-        {path: '/', name: 'Vue',  component: App},
-        {path: '/map', name: 'map',  component: map},
+        {path: '/', name: 'Vue',  component: map},
         {path: '/about', name:'about', component: about}
     ]
 })
