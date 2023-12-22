@@ -573,7 +573,7 @@ function generateNewIncident() {
     </div>
 
 
-    <a href="/aboutTheProject">/aboutTheProject</a>
+    <a href="/about">/aboutTheProject</a>
 </template>
 
 <style>
