@@ -571,9 +571,6 @@ function generateNewIncident() {
             </table>
         </div>
     </div>
-
-
-    <a href="/aboutTheProject">/aboutTheProject</a>
 </template>
 
 <style>

@@ -1,12 +1,14 @@
 <script>
 import Ethan from '@/assets/PortraitEthan.jpg'
 import Furaha from '@/assets/PortraitFuraha.jpg'
+import Tanner from '@/assets/PortraitTanner.jpg'
 
 export default {
   data() {
     return {
       E: Ethan,
-      F: Furaha
+      F: Furaha,
+      T: Tanner,
     }
   }
 }
@@ -27,9 +29,9 @@ export default {
 
       <div class="cell small-12 medium-4">
         <h2 style="text-align: center">Tanner</h2>
-        <img class="align-center" src="" alt="picture of Ethan Honzik" />
+        <img class="align-center" :src="T" alt="picture of Tanner Urbanski" />
         <div class="cell small-12 medium-8 large-8">
-          <p style="text-align: center">information</p>
+          <p style="text-align: center">Hello, my name is Tanner Urbanski and I am a senior majoring in environmental science and minoring in computer science. I like to play hockey when I can.</p>
         </div>
       </div>
 
