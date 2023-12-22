@@ -1,10 +1,12 @@
 <script>
 import Ethan from '@/assets/PortraitEthan.jpg'
+import Furaha from '@/assets/PortraitFuraha.jpg'
 
 export default {
   data() {
     return {
-      E: Ethan
+      E: Ethan,
+      F: Furaha
     }
   }
 }
@@ -33,9 +35,9 @@ export default {
 
       <div class="cell small-12 medium-4">
         <h2 style="text-align: center">Furaha</h2>
-        <img class="align-center" src="" alt="picture of Furaha Aswan" />
+        <img class="align-center" :src="F" alt="picture of Furaha Aswan" />
         <div class="cell small-12 medium-8 large-8">
-          <p style="text-align: center"></p>
+          <p style="text-align: center">Hi, my name is Furaha Aswan and I'm a senior majoring in computer science. In my free time I like to play video games and make music.</p>
         </div>
       </div>
 
