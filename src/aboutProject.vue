@@ -1,6 +1,7 @@
 <script setup></script>
 <template>
   <!-- Your page content lives here -->
+  <RouterLink to="/">Home</RouterLink>
   <h1 style="text-align: center">About The Project</h1>
   <div class="grid-container">
     <div class="grid-x">

@@ -420,8 +420,8 @@ function generateNewIncident() {
         <br />
         <button class="button" type="button" @click="closeDialog">OK</button>
     </dialog> -->
+    <RouterLink to="/about">About</RouterLink>
     <div class="grid-x">
-        
         <div class="cell large-2">
             <div class="cell large-12">
                 <h3 style="text-align: center;">Incident Type</h3>
