@@ -21,7 +21,7 @@ export default {
         <h2 style="text-align: center">Ethan</h2>
         <img class="align-center" :src="E" alt="picture of Ethan Honzik" />
         <div class="cell small-12 medium-8 large-8">
-          <p style="text-align: center">information</p>
+          <p style="text-align: center">Hi, I'm Ethan Honzik. I'm a senior studying computer science.</p>
         </div>
       </div>
 
@@ -42,24 +42,26 @@ export default {
       </div>
 
       <div class="cell small-12 medium-5" style="background-color: rgba(128, 128, 128, 0.308);">
-        <h2 style="text-align: center">Findings</h2>
+        <h2>Findings</h2>
         <div class="cell small-12 medium-8 large-8">
           <ul>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
+            <li>surprised by the amount of homicides</li>
+            <li>surprised by the number of crimes</li>
+            <li>There were 889 assault cases in december 2022</li>
+            <li>There were 1002 vehicle thefts in december</li>
+            <li>West Side, West seventh, and Thomas/Dale seem to have the most Motor Vehicle Thefts</li>
+            <li>Capital river has mostly Thefts and proactive police visits</li>
           </ul>
         </div>
       </div>
       <div class="cell small-12 medium-5" style="background-color: rgba(128, 128, 128, 0.308);">
-        <h2 style="text-align: center">Tools used</h2>
+        <h2>Tools used</h2>
         <div class="cell small-12 medium-8 large-8">
           <ul>
-            <li></li>
-            <li></li>
-            <li></li>
+            <li>Vue</li>
+            <li>Vue Router</li>
+            <li>Foundation</li>
+            <li>SQLite3</li>
           </ul>
         </div>
       </div>
