@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <script setup>
 /* global L*/
 import { reactive, ref, onMounted } from 'vue'
@@ -420,7 +421,7 @@ function generateNewIncident() {
         <br />
         <button class="button" type="button" @click="closeDialog">OK</button>
     </dialog> -->
-    <RouterLink to="/about">About</RouterLink>
+    <RouterLink class="button" to="/about">About</RouterLink>
     <div class="grid-x">
         <div class="cell large-2">
             <div class="cell large-12">
