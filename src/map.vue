@@ -15,7 +15,7 @@ const redIcon = new L.Icon({
 });
 
 let search_address = ref('');
-let crime_url = ref('http://localhost:8000');
+let crime_url = ref('');
 let dialog_err = ref(false);
 let crimes = ref([]);
 
@@ -413,14 +413,14 @@ function generateNewIncident() {
 </script>
 
 <template>
-    <!-- <dialog id="rest-dialog" open>
+    <dialog id="rest-dialog" open>
         <h1 class="dialog-header">St. Paul Crime REST API</h1>
         <label class="dialog-label">URL: </label>
         <input id="dialog-url" class="dialog-input" type="url" v-model="crime_url" placeholder="http://localhost:8000" />
         <p class="dialog-error" v-if="dialog_err">Error: must enter valid URL</p>
         <br />
         <button class="button" type="button" @click="closeDialog">OK</button>
-    </dialog> -->
+    </dialog>
     <RouterLink class="button" to="/about">About</RouterLink>
     <div class="grid-x">
         <div class="cell large-2">
