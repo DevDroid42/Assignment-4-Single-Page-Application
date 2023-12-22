@@ -70,9 +70,7 @@ export default {
 
       <div class="cell small-12 medium-12">
         <h2 style="text-align: center">Video Demo</h2>
-        <div class="cell small-12 medium-8 large-8">
-          <p style="text-align: center"></p>
-        </div>
+        <iframe width="720" height="405" src="https://www.youtube.com/embed/DVQA_cd1UzQ"></iframe>
       </div>
 
     </div>
